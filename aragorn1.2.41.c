@@ -1,682 +1,3 @@
-
-/*
----------------------------------------------------------------
-ARAGORN v1.2.41 Dean Laslett
----------------------------------------------------------------
-
-    ARAGORN (together with ARWEN at last)
-    Detects tRNA, mtRNA, and tmRNA genes in nucleotide sequences
-    Copyright (C) 2003-Present Dean Laslett
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License (see below),
-    or (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-    A minimum requirement is at least a 32 bit compiler architecture
-    (variable types int and unsigned int are at least 4 bytes long).
-    Please report bugs and suggestions for improvements to the authors.
-
-    E-mail: Dean Laslett:  gaiaquark@gmail.com
-
-    Version 1.2.41  September 2nd, 2020.
-    Thanks to Kelly Williams for feedback
-    Thanks to Francisco Ossandon for finding many bugs and testing
-    Thanks to Haruo Suzuki for finding bugs
-    Thanks to Sascha Steinbiss for fixing bugs
-
-
-    Please reference the following papers if you use this
-    program as part of any published research.
-
-    Laslett, D. and Canback, B. (2004)
-    ARAGORN, a program for the detection of transfer RNA and
-    transfer-messenger RNA genes in nucleotide sequences.
-    Nucleic Acids Research, 32;11-16.
-
-    Laslett, D. and Canback, B. (2008)
-    ARWEN: a program to detect tRNA genes in
-    metazoan mitochondrial nucleotide sequences.
-    Bioinformatics, 24(2); 172-175.
-
-
-
-                      GNU GENERAL PUBLIC LICENSE
-                       Version 3, 29 June 2007
-
- Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
-
-                            Preamble
-
-  The GNU General Public License is a free, copyleft license for
-software and other kinds of works.
-
-  The licenses for most software and other practical works are designed
-to take away your freedom to share and change the works.  By contrast,
-the GNU General Public License is intended to guarantee your freedom to
-share and change all versions of a program--to make sure it remains free
-software for all its users.  We, the Free Software Foundation, use the
-GNU General Public License for most of our software; it applies also to
-any other work released this way by its authors.  You can apply it to
-your programs, too.
-
-  When we speak of free software, we are referring to freedom, not
-price.  Our General Public Licenses are designed to make sure that you
-have the freedom to distribute copies of free software (and charge for
-them if you wish), that you receive source code or can get it if you
-want it, that you can change the software or use pieces of it in new
-free programs, and that you know you can do these things.
-
-  To protect your rights, we need to prevent others from denying you
-these rights or asking you to surrender the rights.  Therefore, you have
-certain responsibilities if you distribute copies of the software, or if
-you modify it: responsibilities to respect the freedom of others.
-
-  For example, if you distribute copies of such a program, whether
-gratis or for a fee, you must pass on to the recipients the same
-freedoms that you received.  You must make sure that they, too, receive
-or can get the source code.  And you must show them these terms so they
-know their rights.
-
-  Developers that use the GNU GPL protect your rights with two steps:
-(1) assert copyright on the software, and (2) offer you this License
-giving you legal permission to copy, distribute and/or modify it.
-
-  For the developers' and authors' protection, the GPL clearly explains
-that there is no warranty for this free software.  For both users' and
-authors' sake, the GPL requires that modified versions be marked as
-changed, so that their problems will not be attributed erroneously to
-authors of previous versions.
-
-  Some devices are designed to deny users access to install or run
-modified versions of the software inside them, although the manufacturer
-can do so.  This is fundamentally incompatible with the aim of
-protecting users' freedom to change the software.  The systematic
-pattern of such abuse occurs in the area of products for individuals to
-use, which is precisely where it is most unacceptable.  Therefore, we
-have designed this version of the GPL to prohibit the practice for those
-products.  If such problems arise substantially in other domains, we
-stand ready to extend this provision to those domains in future versions
-of the GPL, as needed to protect the freedom of users.
-
-  Finally, every program is threatened constantly by software patents.
-States should not allow patents to restrict development and use of
-software on general-purpose computers, but in those that do, we wish to
-avoid the special danger that patents applied to a free program could
-make it effectively proprietary.  To prevent this, the GPL assures that
-patents cannot be used to render the program non-free.
-
-  The precise terms and conditions for copying, distribution and
-modification follow.
-
-                       TERMS AND CONDITIONS
-
-  0. Definitions.
-
-  "This License" refers to version 3 of the GNU General Public License.
-
-  "Copyright" also means copyright-like laws that apply to other kinds of
-works, such as semiconductor masks.
-
-  "The Program" refers to any copyrightable work licensed under this
-License.  Each licensee is addressed as "you".  "Licensees" and
-"recipients" may be individuals or organizations.
-
-  To "modify" a work means to copy from or adapt all or part of the work
-in a fashion requiring copyright permission, other than the making of an
-exact copy.  The resulting work is called a "modified version" of the
-earlier work or a work "based on" the earlier work.
-
-  A "covered work" means either the unmodified Program or a work based
-on the Program.
-
-  To "propagate" a work means to do anything with it that, without
-permission, would make you directly or secondarily liable for
-infringement under applicable copyright law, except executing it on a
-computer or modifying a private copy.  Propagation includes copying,
-distribution (with or without modification), making available to the
-public, and in some countries other activities as well.
-
-  To "convey" a work means any kind of propagation that enables other
-parties to make or receive copies.  Mere interaction with a user through
-a computer network, with no transfer of a copy, is not conveying.
-
-  An interactive user interface displays "Appropriate Legal Notices"
-to the extent that it includes a convenient and prominently visible
-feature that (1) displays an appropriate copyright notice, and (2)
-tells the user that there is no warranty for the work (except to the
-extent that warranties are provided), that licensees may convey the
-work under this License, and how to view a copy of this License.  If
-the interface presents a list of user commands or options, such as a
-menu, a prominent item in the list meets this criterion.
-
-  1. Source Code.
-
-  The "source code" for a work means the preferred form of the work
-for making modifications to it.  "Object code" means any non-source
-form of a work.
-
-  A "Standard Interface" means an interface that either is an official
-standard defined by a recognized standards body, or, in the case of
-interfaces specified for a particular programming language, one that
-is widely used among developers working in that language.
-
-  The "System Libraries" of an executable work include anything, other
-than the work as a whole, that (a) is included in the normal form of
-packaging a Major Component, but which is not part of that Major
-Component, and (b) serves only to enable use of the work with that
-Major Component, or to implement a Standard Interface for which an
-implementation is available to the public in source code form.  A
-"Major Component", in this context, means a major essential component
-(kernel, window system, and so on) of the specific operating system
-(if any) on which the executable work runs, or a compiler used to
-produce the work, or an object code interpreter used to run it.
-
-  The "Corresponding Source" for a work in object code form means all
-the source code needed to generate, install, and (for an executable
-work) run the object code and to modify the work, including scripts to
-control those activities.  However, it does not include the work's
-System Libraries, or general-purpose tools or generally available free
-programs which are used unmodified in performing those activities but
-which are not part of the work.  For example, Corresponding Source
-includes interface definition files associated with source files for
-the work, and the source code for shared libraries and dynamically
-linked subprograms that the work is specifically designed to require,
-such as by intimate data communication or control flow between those
-subprograms and other parts of the work.
-
-  The Corresponding Source need not include anything that users
-can regenerate automatically from other parts of the Corresponding
-Source.
-
-  The Corresponding Source for a work in source code form is that
-same work.
-
-  2. Basic Permissions.
-
-  All rights granted under this License are granted for the term of
-copyright on the Program, and are irrevocable provided the stated
-conditions are met.  This License explicitly affirms your unlimited
-permission to run the unmodified Program.  The output from running a
-covered work is covered by this License only if the output, given its
-content, constitutes a covered work.  This License acknowledges your
-rights of fair use or other equivalent, as provided by copyright law.
-
-  You may make, run and propagate covered works that you do not
-convey, without conditions so long as your license otherwise remains
-in force.  You may convey covered works to others for the sole purpose
-of having them make modifications exclusively for you, or provide you
-with facilities for running those works, provided that you comply with
-the terms of this License in conveying all material for which you do
-not control copyright.  Those thus making or running the covered works
-for you must do so exclusively on your behalf, under your direction
-and control, on terms that prohibit them from making any copies of
-your copyrighted material outside their relationship with you.
-
-  Conveying under any other circumstances is permitted solely under
-the conditions stated below.  Sublicensing is not allowed; section 10
-makes it unnecessary.
-
-  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
-
-  No covered work shall be deemed part of an effective technological
-measure under any applicable law fulfilling obligations under article
-11 of the WIPO copyright treaty adopted on 20 December 1996, or
-similar laws prohibiting or restricting circumvention of such
-measures.
-
-  When you convey a covered work, you waive any legal power to forbid
-circumvention of technological measures to the extent such circumvention
-is effected by exercising rights under this License with respect to
-the covered work, and you disclaim any intention to limit operation or
-modification of the work as a means of enforcing, against the work's
-users, your or third parties' legal rights to forbid circumvention of
-technological measures.
-
-  4. Conveying Verbatim Copies.
-
-  You may convey verbatim copies of the Program's source code as you
-receive it, in any medium, provided that you conspicuously and
-appropriately publish on each copy an appropriate copyright notice;
-keep intact all notices stating that this License and any
-non-permissive terms added in accord with section 7 apply to the code;
-keep intact all notices of the absence of any warranty; and give all
-recipients a copy of this License along with the Program.
-
-  You may charge any price or no price for each copy that you convey,
-and you may offer support or warranty protection for a fee.
-
-  5. Conveying Modified Source Versions.
-
-  You may convey a work based on the Program, or the modifications to
-produce it from the Program, in the form of source code under the
-terms of section 4, provided that you also meet all of these conditions:
-
-    a) The work must carry prominent notices stating that you modified
-    it, and giving a relevant date.
-
-    b) The work must carry prominent notices stating that it is
-    released under this License and any conditions added under section
-    7.  This requirement modifies the requirement in section 4 to
-    "keep intact all notices".
-
-    c) You must license the entire work, as a whole, under this
-    License to anyone who comes into possession of a copy.  This
-    License will therefore apply, along with any applicable section 7
-    additional terms, to the whole of the work, and all its parts,
-    regardless of how they are packaged.  This License gives no
-    permission to license the work in any other way, but it does not
-    invalidate such permission if you have separately received it.
-
-    d) If the work has interactive user interfaces, each must display
-    Appropriate Legal Notices; however, if the Program has interactive
-    interfaces that do not display Appropriate Legal Notices, your
-    work need not make them do so.
-
-  A compilation of a covered work with other separate and independent
-works, which are not by their nature extensions of the covered work,
-and which are not combined with it such as to form a larger program,
-in or on a volume of a storage or distribution medium, is called an
-"aggregate" if the compilation and its resulting copyright are not
-used to limit the access or legal rights of the compilation's users
-beyond what the individual works permit.  Inclusion of a covered work
-in an aggregate does not cause this License to apply to the other
-parts of the aggregate.
-
-  6. Conveying Non-Source Forms.
-
-  You may convey a covered work in object code form under the terms
-of sections 4 and 5, provided that you also convey the
-machine-readable Corresponding Source under the terms of this License,
-in one of these ways:
-
-    a) Convey the object code in, or embodied in, a physical product
-    (including a physical distribution medium), accompanied by the
-    Corresponding Source fixed on a durable physical medium
-    customarily used for software interchange.
-
-    b) Convey the object code in, or embodied in, a physical product
-    (including a physical distribution medium), accompanied by a
-    written offer, valid for at least three years and valid for as
-    long as you offer spare parts or customer support for that product
-    model, to give anyone who possesses the object code either (1) a
-    copy of the Corresponding Source for all the software in the
-    product that is covered by this License, on a durable physical
-    medium customarily used for software interchange, for a price no
-    more than your reasonable cost of physically performing this
-    conveying of source, or (2) access to copy the
-    Corresponding Source from a network server at no charge.
-
-    c) Convey individual copies of the object code with a copy of the
-    written offer to provide the Corresponding Source.  This
-    alternative is allowed only occasionally and noncommercially, and
-    only if you received the object code with such an offer, in accord
-    with subsection 6b.
-
-    d) Convey the object code by offering access from a designated
-    place (gratis or for a charge), and offer equivalent access to the
-    Corresponding Source in the same way through the same place at no
-    further charge.  You need not require recipients to copy the
-    Corresponding Source along with the object code.  If the place to
-    copy the object code is a network server, the Corresponding Source
-    may be on a different server (operated by you or a third party)
-    that supports equivalent copying facilities, provided you maintain
-    clear directions next to the object code saying where to find the
-    Corresponding Source.  Regardless of what server hosts the
-    Corresponding Source, you remain obligated to ensure that it is
-    available for as long as needed to satisfy these requirements.
-
-    e) Convey the object code using peer-to-peer transmission, provided
-    you inform other peers where the object code and Corresponding
-    Source of the work are being offered to the general public at no
-    charge under subsection 6d.
-
-  A separable portion of the object code, whose source code is excluded
-from the Corresponding Source as a System Library, need not be
-included in conveying the object code work.
-
-  A "User Product" is either (1) a "consumer product", which means any
-tangible personal property which is normally used for personal, family,
-or household purposes, or (2) anything designed or sold for incorporation
-into a dwelling.  In determining whether a product is a consumer product,
-doubtful cases shall be resolved in favor of coverage.  For a particular
-product received by a particular user, "normally used" refers to a
-typical or common use of that class of product, regardless of the status
-of the particular user or of the way in which the particular user
-actually uses, or expects or is expected to use, the product.  A product
-is a consumer product regardless of whether the product has substantial
-commercial, industrial or non-consumer uses, unless such uses represent
-the only significant mode of use of the product.
-
-  "Installation Information" for a User Product means any methods,
-procedures, authorization keys, or other information required to install
-and execute modified versions of a covered work in that User Product from
-a modified version of its Corresponding Source.  The information must
-suffice to ensure that the continued functioning of the modified object
-code is in no case prevented or interfered with solely because
-modification has been made.
-
-  If you convey an object code work under this section in, or with, or
-specifically for use in, a User Product, and the conveying occurs as
-part of a transaction in which the right of possession and use of the
-User Product is transferred to the recipient in perpetuity or for a
-fixed term (regardless of how the transaction is characterized), the
-Corresponding Source conveyed under this section must be accompanied
-by the Installation Information.  But this requirement does not apply
-if neither you nor any third party retains the ability to install
-modified object code on the User Product (for example, the work has
-been installed in ROM).
-
-  The requirement to provide Installation Information does not include a
-requirement to continue to provide support service, warranty, or updates
-for a work that has been modified or installed by the recipient, or for
-the User Product in which it has been modified or installed.  Access to a
-network may be denied when the modification itself materially and
-adversely affects the operation of the network or violates the rules and
-protocols for communication across the network.
-
-  Corresponding Source conveyed, and Installation Information provided,
-in accord with this section must be in a format that is publicly
-documented (and with an implementation available to the public in
-source code form), and must require no special password or key for
-unpacking, reading or copying.
-
-  7. Additional Terms.
-
-  "Additional permissions" are terms that supplement the terms of this
-License by making exceptions from one or more of its conditions.
-Additional permissions that are applicable to the entire Program shall
-be treated as though they were included in this License, to the extent
-that they are valid under applicable law.  If additional permissions
-apply only to part of the Program, that part may be used separately
-under those permissions, but the entire Program remains governed by
-this License without regard to the additional permissions.
-
-  When you convey a copy of a covered work, you may at your option
-remove any additional permissions from that copy, or from any part of
-it.  (Additional permissions may be written to require their own
-removal in certain cases when you modify the work.)  You may place
-additional permissions on material, added by you to a covered work,
-for which you have or can give appropriate copyright permission.
-
-  Notwithstanding any other provision of this License, for material you
-add to a covered work, you may (if authorized by the copyright holders of
-that material) supplement the terms of this License with terms:
-
-    a) Disclaiming warranty or limiting liability differently from the
-    terms of sections 15 and 16 of this License; or
-
-    b) Requiring preservation of specified reasonable legal notices or
-    author attributions in that material or in the Appropriate Legal
-    Notices displayed by works containing it; or
-
-    c) Prohibiting misrepresentation of the origin of that material, or
-    requiring that modified versions of such material be marked in
-    reasonable ways as different from the original version; or
-
-    d) Limiting the use for publicity purposes of names of licensors or
-    authors of the material; or
-
-    e) Declining to grant rights under trademark law for use of some
-    trade names, trademarks, or service marks; or
-
-    f) Requiring indemnification of licensors and authors of that
-    material by anyone who conveys the material (or modified versions of
-    it) with contractual assumptions of liability to the recipient, for
-    any liability that these contractual assumptions directly impose on
-    those licensors and authors.
-
-  All other non-permissive additional terms are considered "further
-restrictions" within the meaning of section 10.  If the Program as you
-received it, or any part of it, contains a notice stating that it is
-governed by this License along with a term that is a further
-restriction, you may remove that term.  If a license document contains
-a further restriction but permits relicensing or conveying under this
-License, you may add to a covered work material governed by the terms
-of that license document, provided that the further restriction does
-not survive such relicensing or conveying.
-
-  If you add terms to a covered work in accord with this section, you
-must place, in the relevant source files, a statement of the
-additional terms that apply to those files, or a notice indicating
-where to find the applicable terms.
-
-  Additional terms, permissive or non-permissive, may be stated in the
-form of a separately written license, or stated as exceptions;
-the above requirements apply either way.
-
-  8. Termination.
-
-  You may not propagate or modify a covered work except as expressly
-provided under this License.  Any attempt otherwise to propagate or
-modify it is void, and will automatically terminate your rights under
-this License (including any patent licenses granted under the third
-paragraph of section 11).
-
-  However, if you cease all violation of this License, then your
-license from a particular copyright holder is reinstated (a)
-provisionally, unless and until the copyright holder explicitly and
-finally terminates your license, and (b) permanently, if the copyright
-holder fails to notify you of the violation by some reasonable means
-prior to 60 days after the cessation.
-
-  Moreover, your license from a particular copyright holder is
-reinstated permanently if the copyright holder notifies you of the
-violation by some reasonable means, this is the first time you have
-received notice of violation of this License (for any work) from that
-copyright holder, and you cure the violation prior to 30 days after
-your receipt of the notice.
-
-  Termination of your rights under this section does not terminate the
-licenses of parties who have received copies or rights from you under
-this License.  If your rights have been terminated and not permanently
-reinstated, you do not qualify to receive new licenses for the same
-material under section 10.
-
-  9. Acceptance Not Required for Having Copies.
-
-  You are not required to accept this License in order to receive or
-run a copy of the Program.  Ancillary propagation of a covered work
-occurring solely as a consequence of using peer-to-peer transmission
-to receive a copy likewise does not require acceptance.  However,
-nothing other than this License grants you permission to propagate or
-modify any covered work.  These actions infringe copyright if you do
-not accept this License.  Therefore, by modifying or propagating a
-covered work, you indicate your acceptance of this License to do so.
-
-  10. Automatic Licensing of Downstream Recipients.
-
-  Each time you convey a covered work, the recipient automatically
-receives a license from the original licensors, to run, modify and
-propagate that work, subject to this License.  You are not responsible
-for enforcing compliance by third parties with this License.
-
-  An "entity transaction" is a transaction transferring control of an
-organization, or substantially all assets of one, or subdividing an
-organization, or merging organizations.  If propagation of a covered
-work results from an entity transaction, each party to that
-transaction who receives a copy of the work also receives whatever
-licenses to the work the party's predecessor in interest had or could
-give under the previous paragraph, plus a right to possession of the
-Corresponding Source of the work from the predecessor in interest, if
-the predecessor has it or can get it with reasonable efforts.
-
-  You may not impose any further restrictions on the exercise of the
-rights granted or affirmed under this License.  For example, you may
-not impose a license fee, royalty, or other charge for exercise of
-rights granted under this License, and you may not initiate litigation
-(including a cross-claim or counterclaim in a lawsuit) alleging that
-any patent claim is infringed by making, using, selling, offering for
-sale, or importing the Program or any portion of it.
-
-  11. Patents.
-
-  A "contributor" is a copyright holder who authorizes use under this
-License of the Program or a work on which the Program is based.  The
-work thus licensed is called the contributor's "contributor version".
-
-  A contributor's "essential patent claims" are all patent claims
-owned or controlled by the contributor, whether already acquired or
-hereafter acquired, that would be infringed by some manner, permitted
-by this License, of making, using, or selling its contributor version,
-but do not include claims that would be infringed only as a
-consequence of further modification of the contributor version.  For
-purposes of this definition, "control" includes the right to grant
-patent sublicenses in a manner consistent with the requirements of
-this License.
-
-  Each contributor grants you a non-exclusive, worldwide, royalty-free
-patent license under the contributor's essential patent claims, to
-make, use, sell, offer for sale, import and otherwise run, modify and
-propagate the contents of its contributor version.
-
-  In the following three paragraphs, a "patent license" is any express
-agreement or commitment, however denominated, not to enforce a patent
-(such as an express permission to practice a patent or covenant not to
-sue for patent infringement).  To "grant" such a patent license to a
-party means to make such an agreement or commitment not to enforce a
-patent against the party.
-
-  If you convey a covered work, knowingly relying on a patent license,
-and the Corresponding Source of the work is not available for anyone
-to copy, free of charge and under the terms of this License, through a
-publicly available network server or other readily accessible means,
-then you must either (1) cause the Corresponding Source to be so
-available, or (2) arrange to deprive yourself of the benefit of the
-patent license for this particular work, or (3) arrange, in a manner
-consistent with the requirements of this License, to extend the patent
-license to downstream recipients.  "Knowingly relying" means you have
-actual knowledge that, but for the patent license, your conveying the
-covered work in a country, or your recipient's use of the covered work
-in a country, would infringe one or more identifiable patents in that
-country that you have reason to believe are valid.
-
-  If, pursuant to or in connection with a single transaction or
-arrangement, you convey, or propagate by procuring conveyance of, a
-covered work, and grant a patent license to some of the parties
-receiving the covered work authorizing them to use, propagate, modify
-or convey a specific copy of the covered work, then the patent license
-you grant is automatically extended to all recipients of the covered
-work and works based on it.
-
-  A patent license is "discriminatory" if it does not include within
-the scope of its coverage, prohibits the exercise of, or is
-conditioned on the non-exercise of one or more of the rights that are
-specifically granted under this License.  You may not convey a covered
-work if you are a party to an arrangement with a third party that is
-in the business of distributing software, under which you make payment
-to the third party based on the extent of your activity of conveying
-the work, and under which the third party grants, to any of the
-parties who would receive the covered work from you, a discriminatory
-patent license (a) in connection with copies of the covered work
-conveyed by you (or copies made from those copies), or (b) primarily
-for and in connection with specific products or compilations that
-contain the covered work, unless you entered into that arrangement,
-or that patent license was granted, prior to 28 March 2007.
-
-  Nothing in this License shall be construed as excluding or limiting
-any implied license or other defenses to infringement that may
-otherwise be available to you under applicable patent law.
-
-  12. No Surrender of Others' Freedom.
-
-  If conditions are imposed on you (whether by court order, agreement or
-otherwise) that contradict the conditions of this License, they do not
-excuse you from the conditions of this License.  If you cannot convey a
-covered work so as to satisfy simultaneously your obligations under this
-License and any other pertinent obligations, then as a consequence you may
-not convey it at all.  For example, if you agree to terms that obligate you
-to collect a royalty for further conveying from those to whom you convey
-the Program, the only way you could satisfy both those terms and this
-License would be to refrain entirely from conveying the Program.
-
-  13. Use with the GNU Affero General Public License.
-
-  Notwithstanding any other provision of this License, you have
-permission to link or combine any covered work with a work licensed
-under version 3 of the GNU Affero General Public License into a single
-combined work, and to convey the resulting work.  The terms of this
-License will continue to apply to the part which is the covered work,
-but the special requirements of the GNU Affero General Public License,
-section 13, concerning interaction through a network will apply to the
-combination as such.
-
-  14. Revised Versions of this License.
-
-  The Free Software Foundation may publish revised and/or new versions of
-the GNU General Public License from time to time.  Such new versions will
-be similar in spirit to the present version, but may differ in detail to
-address new problems or concerns.
-
-  Each version is given a distinguishing version number.  If the
-Program specifies that a certain numbered version of the GNU General
-Public License "or any later version" applies to it, you have the
-option of following the terms and conditions either of that numbered
-version or of any later version published by the Free Software
-Foundation.  If the Program does not specify a version number of the
-GNU General Public License, you may choose any version ever published
-by the Free Software Foundation.
-
-  If the Program specifies that a proxy can decide which future
-versions of the GNU General Public License can be used, that proxy's
-public statement of acceptance of a version permanently authorizes you
-to choose that version for the Program.
-
-  Later license versions may give you additional or different
-permissions.  However, no additional obligations are imposed on any
-author or copyright holder as a result of your choosing to follow a
-later version.
-
-  15. Disclaimer of Warranty.
-
-  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
-APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
-HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
-OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
-IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
-ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
-
-  16. Limitation of Liability.
-
-  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
-THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
-GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
-USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
-DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
-PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
-EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGES.
-
-  17. Interpretation of Sections 15 and 16.
-
-  If the disclaimer of warranty and limitation of liability provided
-above cannot be given local legal effect according to their terms,
-reviewing courts shall apply local law that most closely approximates
-an absolute waiver of all civil liability in connection with the
-Program, unless a warranty or assumption of liability accompanies a
-copy of the Program in return for a fee.
-
-                     END OF TERMS AND CONDITIONS
-
----------------------------------------------------------------
-ARAGORN v1.2.41 Dean Laslett
----------------------------------------------------------------
-*/
-
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -686,7 +7,6 @@ ARAGORN v1.2.41 Dean Laslett
 #define SEEK_END        2
 #endif
 
-
 #define NOCHAR          '\0'
 #define DLIM            '\n'
 #define STRLEN          4001
@@ -694,15 +14,12 @@ ARAGORN v1.2.41 Dean Laslett
 #define SHORTSTRLEN     51
 #define SHORTSTRLENM1   50
 #define KEYLEN          15
-#define NHELPLINE       181  /* was 174 */
 #define INACTIVE        2.0e+35
 #define IINACTIVE       2000000001L
 #define ITHRESHOLD      2000000000L
 #define space(c)        (c==' ')||(c=='\t')||(c=='\n')||(c=='\r')
 #define sq(pos)         ((pos + d->psmax - 1L) % d->psmax) + 1L
 #define itmparam(x,y)   fputc(x,y)
-
-
 
 #define FASTA   0
 #define GENBANK 1
@@ -749,6 +66,8 @@ ARAGORN v1.2.41 Dean Laslett
 
 #define INSERT          -2
 #define TERM            -1
+
+// These values are used in `seq`
 #define Adenine         0
 #define Cytosine        1
 #define Guanine         2
@@ -779,15 +98,13 @@ ARAGORN v1.2.41 Dean Laslett
 #define MATX 42
 #define MATY 34
 
-
-
-#define ASTEM2_EXT       9
-#define ASTEM2_EXTD      4                   /* <= ASTEM2_EXT */
-#define ASTEM2_EXTE      5                   /* ASTEM2_EXT - ASTEM2_EXTD */
-#define MINTSTEM_DIST      (17 + ASTEM2_EXT)
-#define MAXTSTEM_DIST      (26 + ASTEM2_EXT)
-#define MAXDSTEM_DIST      9
-#define MINDSTEM_DIST      8
+#define ASTEM2_EXT      9
+#define ASTEM2_EXTD     4                   /* <= ASTEM2_EXT */
+#define ASTEM2_EXTE     5                   /* ASTEM2_EXT - ASTEM2_EXTD */
+#define MINTSTEM_DIST   (17 + ASTEM2_EXT)
+#define MAXTSTEM_DIST   (26 + ASTEM2_EXT)
+#define MAXDSTEM_DIST   9
+#define MINDSTEM_DIST   8
 #define MININTRONLEN    0
 #define MAXINTRONLEN    3000
 #define MINCTRNALEN     62
@@ -900,6 +217,7 @@ must remain equal to or more than 2*MAXTMRNALEN and TSWEEP.
 #define NCDSCODON   1000
 
 
+
 typedef struct { long start;
                  long stop;
                  int comp;
@@ -911,11 +229,9 @@ typedef struct { long start;
                  int detected;
                  char species[SHORTSTRLEN]; } annotated_gene;
 
-
 typedef struct { char filename[80];
                  FILE *f;
                  char seqname[STRLEN];
-                 int bugmode;
                  int datatype;
                  double gc;
                  long filepointer;
@@ -929,7 +245,6 @@ typedef struct { char filename[80];
                  long aseqlen;
                  int nagene[NS];
                  annotated_gene gene[NGFT]; } data_set;
-
 
 typedef struct { char name[100];
                  int seq[MAXTRNALEN+1];
@@ -994,7 +309,6 @@ typedef struct { int *pos;
                  double energy;
                  double stem_energy; } mt_trna_tloop;
 
-
 typedef struct { int *pos;
                  int *end;
                  int stem;
@@ -1042,10 +356,8 @@ typedef struct { int *pos;
                  int codon;
                  int win; } cds_codon;
 
-
 typedef struct { char name[50];
                  char tag[50]; } tmrna_tag_entry;
-
 
 typedef struct { char genetypename[NS][10];
                  FILE *f;
@@ -1140,8 +452,6 @@ typedef struct { char genetypename[NS][10];
                  double eref[NS];
                  int tmrna_struct[200];
                } csw;
-
-
 
 
 
@@ -2066,7 +1376,7 @@ https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
      Trp,Gly,Arg,Ser,    /* SeC/Stop -> Trp, Arg->Ser */
      Ser,Ala,Pro,Thr,
      Tyr,Glu,Gln,Lys }   /* Stop -> Tyr */
- };
+};
 
 
 
@@ -2074,195 +1384,6 @@ https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
 /* POINTERS TO DETECTED GENES */
 
   gene *ts;
-
-
-/* HELP MENU */
-
-char helpmenu[NHELPLINE][81] =
-{
-"----------------------------",
-"ARAGORN v1.2.41 Dean Laslett",
-"----------------------------\n",
-"Please reference the following papers if you use this",
-"program as part of any published research.\n",
-"Laslett, D. and Canback, B. (2004) ARAGORN, a",
-"program for the detection of transfer RNA and transfer-messenger",
-"RNA genes in nucleotide sequences",
-"Nucleic Acids Research, 32;11-16\n",
-"Laslett, D. and Canback, B. (2008) ARWEN: a",
-"program to detect tRNA genes in metazoan mitochondrial",
-"nucleotide sequences",
-"Bioinformatics, 24(2); 172-175.\n\n",
-"ARAGORN detects tRNA, mtRNA, and tmRNA genes.\n",
-"Usage:",
-"aragorn -v -e -s -d -c -l -j -a -q -rn -w -ifro<min>,<max> -t -mt -m",
-"        -rp -ps -gc -tv -seq -br -fasta -fo -o <outfile> <filename>\n",
-"<filename> is assumed to contain one or more sequences",
-"in FASTA or GENBANK format. Results of the search are printed",
-"to STDOUT. All switches are optional and case-insensitive.",
-"Unless -i is specified, tRNA genes containing introns",
-"are not detected.\n",
-"    -m            Search for tmRNA genes.",
-"    -t            Search for tRNA genes.",
-"                  By default, all are detected. If one of",
-"                  -m or -t is specified, then the other",
-"                  is not detected unless specified as well.",
-"    -mt           Search for Metazoan mitochondrial tRNA genes.",
-"                  tRNA genes with introns not detected. -i,-sr switchs",
-"                  ignored. Composite Metazoan mitochondrial",
-"                  genetic code used.",
-"    -mtmam        Search for Mammalian mitochondrial tRNA",
-"                  genes. -i switch ignored. -tv switch set.",
-"                  Mammalian mitochondrial genetic code used.",
-"    -mtx          Same as -mt but low scoring tRNA genes are",
-"                  not reported.",
-"    -mtd          Overlapping metazoan mitochondrial tRNA genes",
-"                  on opposite strands are reported.",
-"    -gc<num>      Use the GenBank transl_table = <num> genetic code.",
-"    -gcstd        Use standard genetic code.",
-"    -gcmet        Use composite Metazoan mitochondrial genetic code.",
-"    -gcvert       Use Vertebrate mitochondrial genetic code.",
-"    -gcinvert     Use Invertebrate mitochondrial genetic code.",
-"    -gcyeast      Use Yeast mitochondrial genetic code.",
-"    -gcprot       Use Mold/Protozoan/Coelenterate mitochondrial genetic code.",
-"    -gcciliate    Use Ciliate genetic code.",
-"    -gcflatworm   Use Echinoderm/Flatworm mitochondrial genetic code",
-"    -gceuplot     Use Euplotid genetic code.",
-"    -gcbact       Use Bacterial/Plant chloroplast genetic code.",
-"    -gcaltyeast   Use alternative Yeast genetic code.",
-"    -gcascid      Use Ascidian mitochondrial genetic code.",
-"    -gcaltflat    Use alternative flatworm mitochondrial genetic code.",
-"    -gcblep       Use Blepharisma genetic code.",
-"    -gcchloroph   Use Chlorophycean mitochondrial genetic code.",
-"    -gctrem       Use Trematode mitochondrial genetic code.",
-"    -gcscen       Use Scenedesmus obliquus mitochondrial genetic code.",
-"    -gcthraust    Use Thraustochytrium mitochondrial genetic code.",
-"    -gcptero      Use Pterobranchia mitochondrial genetic code.",
-"    -gcgrac       Use Gracilibacteria genetic code.",
-"    -gcpach       Use Pachysolen tannophilus genetic code.",
-"    -gckary       Use Karyorelict genetic code.",
-"    -gccond       Use Condylostoma genetic code.",
-"    -gcmeso       Use Mesodinium genetic code.",
-"    -gcperi       Use Peritrich genetic code.",
-"    -gcblast      Use Blastocrithidia genetic code.",
-"    -gcceph       Use Cephalodiscidae mitochondrial UAA-Tyr genetic code.",
-"                  Individual modifications can be appended using",
-"    ,BBB=<aa>     B = A,C,G, or T. <aa> is the three letter",
-"                  code for an amino-acid. More than one modification",
-"                  can be specified. eg -gcvert,aga=Trp,agg=Trp uses",
-"                  the Vertebrate mitochondrial code and the codons",
-"                  AGA and AGG changed to Tryptophan.",
-"    -c            Assume that each sequence has a circular",
-"                  topology. Search wraps around each end.",
-"                  Default setting.",
-"    -l            Assume that each sequence has a linear",
-"                  topology. Search does not wrap.",
-"    -d            Double. Search both strands of each",
-"                  sequence. Default setting.",
-"    -s  or -s+    Single. Do not search the complementary",
-"                  (antisense) strand of each sequence.",
-"    -sc or -s-    Single complementary. Do not search the sense",
-"                  strand of each sequence.",
-"    -i            Search for tRNA genes with introns in",
-"                  anticodon loop with maximum length 3000",
-"                  bases. Minimum intron length is 0 bases.",
-"                  Ignored if -m is specified.",
-"    -i<max>       Search for tRNA genes with introns in",
-"                  anticodon loop with maximum length <max>",
-"                  bases. Minimum intron length is 0 bases.",
-"                  Ignored if -m is specified.",
-"    -i<min>,<max> Search for tRNA genes with introns in",
-"                  anticodon loop with maximum length <max>",
-"                  bases, and minimum length <min> bases.",
-"                  Ignored if -m is specified.",
-"    -io           Same as -i, but allow tRNA genes with long",
-"                  introns to overlap shorter tRNA genes.",
-"    -if           Same as -i, but fix intron between positions",
-"                  37 and 38 on C-loop (one base after anticodon).",
-"    -ifo          Same as -if and -io combined.",
-"    -ir           Same as -i, but report tRNA genes with minimum",
-"                  length <min> bases rather than search for",
-"                  tRNA genes with minimum length <min> bases.",
-"                  With this switch, <min> acts as an output filter,",
-"                  minimum intron length for searching is still 0 bases.",
-"    -tv           Do not search for mitochondrial TV replacement",
-"                  loop tRNA genes. Only relevant if -mt used.",
-"    -c7           Search for tRNA genes with 7 base C-loops only.",
-"    -ss           Use the stricter canonical 1-2 bp spacer1 and",
-"                  1 bp spacer2. Ignored if -mt set. Default is to",
-"                  allow 3 bp spacer1 and 0-2 bp spacer2, which may",
-"                  degrade selectivity.",
-"    -j            Display 4-base sequence on 3' end of astem",
-"                  regardless of predicted amino-acyl acceptor length.",
-"    -jr           Allow some divergence of 3' amino-acyl acceptor",
-"                  sequence from NCCA.",
-"    -jr4          Allow some divergence of 3' amino-acyl acceptor",
-"                  sequence from NCCA, and display 4 bases.",
-"    -e            Print out score for each reported gene.",
-"    -ps           Lower scoring thresholds to 95% of default levels.",
-"    -ps<num>      Change scoring thresholds to <num> percent of default levels.",
-"    -rp           Flag possible pseudogenes (score < 100 or tRNA anticodon",
-"                  loop <> 7 bases long). Note that genes with score < 100",
-"                  will not be detected or flagged if scoring thresholds are not",
-"                  also changed to below 100% (see -ps switch).",
-"    -rp<num>      Flag possible pseudogenes and change score threshold to <num>",
-"                  percent of default levels.",
-"    -seq          Print out primary sequence.",
-"    -br           Show secondary structure of tRNA gene primary sequence,",
-"                  or tRNA domain for tmRNA genes, using round brackets.",
-"    -svg          Generate SVG image file code for secondary structure.",
-"    -fasta        Print out primary sequence in fasta format.",
-"    -fo           Print out primary sequence in fasta format only",
-"                  (no secondary structure).",
-"    -fon          Same as -fo, with sequence and gene numbering in header.",
-"    -fos          Same as -fo, with no spaces in header.",
-"    -fons         Same as -fo, with sequence and gene numbering, but no spaces.",
-"    -v            Verbose. Prints out information during",
-"                  search to STDERR.",
-"    -a            Print out tRNA domain for tmRNA genes.",
-"    -a7           Restrict tRNA astem length to a maximum of 7 bases",
-"    -aa           Display message if predicted iso-acceptor species",
-"                  does not match species in sequence name (if present).",
-"    -amt<num>     Change annotated tRNA length mismatch reporting threshold to",
-"                  <num> bases when searching GENBANK files. Default is 10 bases.",
-"    -amm<num>     Change annotated tmRNA length mismatch reporting threshold to",
-"                  <num> bases when searching GENBANK files. Default is 30 bases.",
-"    -q            Dont print configuration line (which switches",
-"                  and files were used).",
-"    -rn           Repeat sequence name before summary information.",
-"    -o <outfile>  Print output to <outfile>. If <outfile>",
-"                  already exists, it is overwritten. By default",
-"                  all output goes to stdout.",
-"    -w            Print out in batch mode.",
-"    -wa           Same as -w, but for 6 or 8 base anticodon",
-"                  loops, print possible iso-acceptor species",
-"                  as ?(<species>|<species>) instead of ???",
-"                  For tRNA genes, batch mode output is in the form:\n",
-"                  Sequence name",
-"                  N genes found",
-"                  1 tRNA-<species> [locus 1] <Apos> (nnn)",
-"                  i(<intron position>,<intron length>)",
-"                            .          ",
-"                            .          ",
-"                  N tRNA-<species> [Locus N] <Apos> (nnn)",
-"                  i(<intron position>,<intron length>)\n",
-"                  N is the number of genes found",
-"                  <species> is the tRNA iso-acceptor species",
-"                  <Apos> is the tRNA anticodon relative position",
-"                  (nnn) is the tRNA anticodon base triplet",
-"                  i means the tRNA gene has a C-loop intron\n",
-"                  For tmRNA genes, output is in the form:\n",
-"                  n tmRNA(p) [Locus n] <tag offset>,<tag end offset>",
-"                  <tag peptide>\n",
-"                  p means the tmRNA gene is permuted",
-"    -wunix        Get around problem with some windows gcc compilers",
-"                  (found so far in Strawberry Perl and Active Perl)",
-"                  when reading Unix files.",
-"                  Execution speed may be slower for large files.",
-"                  Execution speed will be a lot slower for files",
-"                  with many small sequences."
-};
-
 
 
 /* tmRNA TAG PEPTIDE DATABASE */
@@ -3546,23 +2667,22 @@ tmrna_tag_entry tagdatabase[NTAGMAX] =
 
 /* TOOLS */
 
-char upcasec(char c)
-{ return((c >= 'a')?c-32:c); }
+char upcasec(char c) { return((c >= 'a')?c-32:c); }
 
-int length(char *s)
-{ int i = 0;
+int length(char *s) {
+  int i = 0;
   while (*s++) i++;
   return(i); }
 
-char *softmatch(char *s, char *key)
-{ while (upcasec(*key) == upcasec(*s))
+char *softmatch(char *s, char *key) {
+  while (upcasec(*key) == upcasec(*s))
    { if (!*key++) return(s);
      s++; }
   if (*key) return(NULL);
   return(s); }
 
-char *strpos(char *s, char *k)
-{ char c,d;
+char *strpos(char *s, char *k) {
+  char c,d;
   int i;
   d = *k;
   while (c = *s)
@@ -3572,9 +2692,8 @@ char *strpos(char *s, char *k)
      s++; }
   return(NULL); }
 
-
-char *softstrpos(char *s, char *k)
-{ char c,d;
+char *softstrpos(char *s, char *k) {
+  char c,d;
   int i;
   d = upcasec(*k);
   while (c = *s)
@@ -3585,8 +2704,8 @@ char *softstrpos(char *s, char *k)
      s++; }
   return(NULL); }
 
-char *wildstrpos(char *s, char *k)
-{ char c,d;
+char *wildstrpos(char *s, char *k) {
+  char c,d;
   int i;
   d = upcasec(*k);
   while (c = *s)
@@ -3597,8 +2716,8 @@ char *wildstrpos(char *s, char *k)
      s++; }
   return(NULL); }
 
-char *marginstring(char *s, char *k, int margin)
-{ char c,d;
+char *marginstring(char *s, char *k, int margin) {
+  char c,d;
   int i,j;
   j = 0;
   d = *k;
@@ -3610,9 +2729,8 @@ char *marginstring(char *s, char *k, int margin)
      if (++j >= margin) break; }
   return(NULL); }
 
-
-int margindetect(char *line, int margin)
-{ int i;
+int margindetect(char *line, int margin) {
+  int i;
   char c,*s;
   i = 0;
   s = line;
@@ -3625,30 +2743,27 @@ int margindetect(char *line, int margin)
   if (c == '\0') return(0);
   return(1); }
 
+char *backword(char *line, char *s, int n) {
+  int spzone;
+  if (space(*s))
+   { spzone = 1; }
+  else
+   { spzone = 0;
+     n++; }
+  while (s > line)
+   { if (space(*s))
+      { if (spzone == 0)
+         { spzone = 1;
+           if (--n <= 0)
+            return(++s); }}
+     else spzone = 0;
+     s--; }
+  if (!space(*s))
+   if (n <= 1) return(s);
+  return(NULL);}
 
-char *backword(char *line, char *s, int n)
-{
-int spzone;
-if (space(*s))
- { spzone = 1; }
-else
- { spzone = 0;
-   n++; }
-while (s > line)
- { if (space(*s))
-    { if (spzone == 0)
-       { spzone = 1;
-         if (--n <= 0)
-          return(++s); }}
-   else spzone = 0;
-   s--; }
-if (!space(*s))
- if (n <= 1) return(s);
-return(NULL);
-}
-
-char *dconvert(char *s, double *r)
-{ static char zero='0',nine='9';
+char *dconvert(char *s, double *r) {
+  static char zero='0',nine='9';
   int shift,expshift,sgn,expsgn,exponent;
   char c,limit;
   double result;
@@ -3697,8 +2812,8 @@ char *dconvert(char *s, double *r)
   (*r) *= 0.01*result;
   return(s); }
 
-char *lconvert(char *s, long *r)
-{ static char zero='0',nine='9';
+char *lconvert(char *s, long *r) {
+  static char zero='0',nine='9';
   long sgn;
   long result;
   char c;
@@ -3717,9 +2832,8 @@ char *lconvert(char *s, long *r)
   *r = result * sgn;
   return(s); }
 
-
-char *getlong(char *line, long *l)
-{ static char zero='0',nine='9';
+char *getlong(char *line, long *l) {
+  static char zero='0',nine='9';
   char c1,c2,*s;
   if (!line) return(NULL);
   s = line;
@@ -3735,30 +2849,24 @@ char *getlong(char *line, long *l)
      s++; }
   return(NULL); }
 
+char *copy(char *from, char *to) {
+  while (*to++ = *from++);
+  return(--to); }
 
+char *copy2sp(char *from1, char *from2, char *to, int n) {
+  char *s;
+  s = to;
+  while (from1 < from2)
+   { *s++ = *from1++;
+     if (--n <= 0)
+      { do if (--s <= to) break;
+        while (!space(*s));
+        break; }}
+  *s = '\0';
+  return(s); }
 
-char *copy(char *from, char *to)
-{ while (*to++ = *from++);
-  return(--to);  }
-
-
-char *copy2sp(char *from1, char *from2, char *to, int n)
-{
-char *s;
-s = to;
-while (from1 < from2)
- { *s++ = *from1++;
-   if (--n <= 0)
-    { do if (--s <= to) break;
-      while (!space(*s));
-      break; }}
-*s = '\0';
-return(s);
-}
-
-
-char *copy3cr(char *from, char *to, int n)
-{ while (*to = *from++)
+char *copy3cr(char *from, char *to, int n) {
+  while (*to = *from++)
    { if (*to == DLIM)
       { *to = '\0';
         break; }
@@ -3768,8 +2876,8 @@ char *copy3cr(char *from, char *to, int n)
      to++; }
   return(to); }
 
-char *quotestring(char *line, char *a, int n)
-{ char ch;
+char *quotestring(char *line, char *a, int n) {
+  char ch;
   while (ch = *line++)
    if (ch == '"')
     { while (ch = *line++)
@@ -3784,87 +2892,63 @@ char *quotestring(char *line, char *a, int n)
   return(a); }
 
 
+
 /* LIBRARY */
 
+int fseekd(data_set *d, long fpos, long foffset) {
+  if (fseek(d->f,fpos,SEEK_SET)) return(EOF);
+  d->filepointer = fpos;
+  if (foffset != 0L)
+   { if ((fpos + foffset) < 0L) foffset = -fpos;
+     if (fseek(d->f,foffset,SEEK_CUR)) return(EOF);
+     d->filepointer += foffset; }
+  return(0); }
 
-int fseekd(data_set *d, long fpos, long foffset)
-{
-if (d->bugmode)
- { fpos += foffset;
-   if (fpos < 0L) fpos = 0L;
-   if (fseek(d->f,0L,SEEK_SET)) return(EOF);
-   d->filepointer = -1L;
-   while (++d->filepointer < fpos)
-    if (getc(d->f) == EOF) return(EOF);
-   return(0); }
-if (fseek(d->f,fpos,SEEK_SET)) return(EOF);
-d->filepointer = fpos;
-if (foffset != 0L)
- { if ((fpos + foffset) < 0L) foffset = -fpos;
-   if (fseek(d->f,foffset,SEEK_CUR)) return(EOF);
-   d->filepointer += foffset; }
-return(0);
-}
+long ftelld(data_set *d) {
+  return(ftell(d->f)); }
 
+char fgetcd(data_set *d) {
+  int ic;
+  if ((ic = getc(d->f)) == EOF) return(NOCHAR);
+  d->filepointer++;
+  return((char)ic); }
 
-long ftelld(data_set *d)
-{
-if (d->bugmode) return(d->filepointer);
-else return(ftell(d->f));
-}
+char *fgetsd(data_set *d, char line[], int len) {
+  int i,ic;
+  i = 0;
+  while (i < len)
+   { if ((ic = getc(d->f)) == EOF) break;
+     d->filepointer++;
+     if (ic == '\r') continue;
+     if (ic == '\n')
+      { line[i++] = DLIM;
+        break; }
+     line[i++] = (char)ic; }
+  if (i < 1) return(NULL);
+  line[i] = '\0';
+  return(line); }
 
+int agene_position_check(data_set *d, int nagene, annotated_gene *agene) {
+  int a;
+  long l,swap;
+  if ((agene->stop - agene->start) > MAXAGENELEN)
+   { swap = agene->stop;
+     agene->stop = agene->start;
+     agene->start = swap;
+     agene->stop += d->aseqlen; }
+  if (agene->start > agene->stop) agene->stop += d->aseqlen;
+  l = agene->stop - agene->start;
+  if ((l < 1) || (l > MAXAGENELEN)) return(0);
+  if (agene->stop == d->aseqlen)
+   { for (a = 0; a < nagene; a++)
+      if (d->gene[a].start == agene->start)
+       if (d->gene[a].genetype == agene->genetype)
+        if (softmatch(d->gene[a].species,agene->species))
+         return(0); }
+  return(1); }
 
-char fgetcd(data_set *d)
-{
-int ic;
-if ((ic = getc(d->f)) == EOF) return(NOCHAR);
-d->filepointer++;
-return((char)ic);
-}
-
-
-char *fgetsd(data_set *d, char line[], int len)
-{
-int i,ic;
-i = 0;
-while (i < len)
- { if ((ic = getc(d->f)) == EOF) break;
-   d->filepointer++;
-   if (ic == '\r') continue;
-   if (ic == '\n')
-    { line[i++] = DLIM;
-      break; }
-   line[i++] = (char)ic; }
-if (i < 1) return(NULL);
-line[i] = '\0';
-return(line);
-}
-
-int agene_position_check(data_set *d, int nagene, annotated_gene *agene)
-{
-int a;
-long l,swap;
-if ((agene->stop - agene->start) > MAXAGENELEN)
- { swap = agene->stop;
-   agene->stop = agene->start;
-   agene->start = swap;
-   agene->stop += d->aseqlen; }
-if (agene->start > agene->stop) agene->stop += d->aseqlen;
-l = agene->stop - agene->start;
-if ((l < 1) || (l > MAXAGENELEN)) return(0);
-if (agene->stop == d->aseqlen)
- { for (a = 0; a < nagene; a++)
-    if (d->gene[a].start == agene->start)
-     if (d->gene[a].genetype == agene->genetype)
-      if (softmatch(d->gene[a].species,agene->species))
-       return(0); }
-return(1);
-}
-
-
-
-long process_sequence_heading(data_set *d, csw *sw)
-{ int i,ic,nagene;
+long process_sequence_heading(data_set *d, csw *sw) {
+  int i,ic,nagene;
   long l,realstart;
   char line[STRLEN],c,*s,*sq,*sd;
   annotated_gene *agene,tmpagene;
@@ -4066,9 +3150,8 @@ long process_sequence_heading(data_set *d, csw *sw)
   fseekd(d,realstart,0L);
   return(realstart); }
 
-
-int move_forward(data_set *d)
-{ int ic;
+int move_forward(data_set *d) {
+  int ic;
   long nextbase;
   static int map[256] =
   { -4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,
@@ -4091,6 +3174,7 @@ int move_forward(data_set *d)
    if (d->psmax > 0L)
     { fseekd(d,d->seqstart,d->seqstartoff);
       d->ps = 0L; }
+
   NL:
   if ((ic = (int)fgetcd(d)) == NOCHAR) goto FAIL;
   SC:
@@ -4135,19 +3219,14 @@ int move_forward(data_set *d)
      return(NOBASE); }
   else return(TERM); }
 
-
-
-char cbase(int c)
-{ static char base[7] = "acgt..";
+char cbase(int c) {
+  static char base[7] = "acgt..";
   if (c < Adenine) return('#');
   if (c > NOBASE) return((char)c);
   return(base[c]); }
 
-
-
-
-int seq_init(data_set *d, csw *sw)
-{ long ngc;
+int seq_init(data_set *d, csw *sw) {
+  long ngc;
   int ic;
   d->filepointer = 0;
   if ((d->seqstart = process_sequence_heading(d,sw)) < 0L)
@@ -4170,25 +3249,21 @@ int seq_init(data_set *d, csw *sw)
   d->ps = 0L;
   return(1); }
 
-
-char cpbase(int c)
-{ static char base[7] = "ACGT..";
+char cpbase(int c) {
+  static char base[7] = "ACGT..";
   if (c < Adenine) return('#');
   if (c > NOBASE) return((char)c);
   return(base[c]); }
 
-
-
-char *aa(int *anticodon, csw *sw)
-{ int p1,p2,p3;
+char *aa(int *anticodon, csw *sw) {
+  int p1,p2,p3;
   if ((p1 = *anticodon) >= AMBIG) return(ambig_aaname);
   if ((p2 = anticodon[1]) >= AMBIG) return(ambig_aaname);
   if ((p3 = anticodon[2]) >= AMBIG) return(ambig_aaname);
   return(aaname[aamap[sw->geneticcode][(p1<<4) + (p2<<2) + p3]]); }
 
-
-char *translate(int *codon, csw *sw)
-{ int p1,p2,p3,aa;
+char *translate(int *codon, csw *sw) {
+  int p1,p2,p3,aa;
   if ((p1 = *codon) >= AMBIG) return(ambig_aaname);
   if ((p2 = codon[1]) >= AMBIG) return(ambig_aaname);
   if ((p3 = codon[2]) >= AMBIG) return(ambig_aaname);
@@ -4196,8 +3271,8 @@ char *translate(int *codon, csw *sw)
   if ((aa == SeC) || (aa == Pyl)) aa = Stop;
   return(aaname[aa]); }
 
-char ltranslate(int *codon, gene *t, csw *sw)
-{ int code,p1,p2,p3;
+char ltranslate(int *codon, gene *t, csw *sw) {
+  int code,p1,p2,p3;
   if (t->genetype == CDS) code = t->asst;
   else code = sw->geneticcode;
   if ((p1 = *codon) >= AMBIG) return(ambig_aaname[0]);
@@ -4205,35 +3280,26 @@ char ltranslate(int *codon, gene *t, csw *sw)
   if ((p3 = codon[2]) >= AMBIG) return(ambig_aaname[0]);
   return(aaletter[aamap[code][((3-p3)<<4)+((3-p2)<<2)+(3-p1)]]); }
 
-
-char ptranslate(int *codon, csw *sw)
-{ int p1,p2,p3;
+char ptranslate(int *codon, csw *sw) {
+  int p1,p2,p3;
   if ((p1 = *codon) >= AMBIG) return(ambig_aaname[0]);
   if ((p2 = codon[1]) >= AMBIG) return(ambig_aaname[0]);
   if ((p3 = codon[2]) >= AMBIG) return(ambig_aaname[0]);
   return(aapolarity[aamap[sw->geneticcode][((3-p3)<<4)+((3-p2)<<2)+(3-p1)]]); }
 
+int seqlen(gene *t) { return(t->nbase + t->nintron); }
 
-int seqlen(gene *t)
-{
-return(t->nbase + t->nintron);
-}
+int aseqlen(data_set *d, annotated_gene *a) {
+  int alen;
+  long astart,astop;
+  astart = a->start;
+  astop = a->stop;
+  if (astart > astop) astop += d->psmax;
+  alen = (int)(astop - astart) + 1;
+  return(alen); }
 
-
-int aseqlen(data_set *d, annotated_gene *a)
-{
-int alen;
-long astart,astop;
-astart = a->start;
-astop = a->stop;
-if (astart > astop) astop += d->psmax;
-alen = (int)(astop - astart) + 1;
-return(alen);
-}
-
-
-double gc_content(gene *t)
-{ int *s,*se;
+double gc_content(gene *t) {
+  int *s,*se;
   double ngc;
   static double score[6] = { 0.0,1.0,1.0,0.0,0.0,0.0 };
   ngc = 0.0;
@@ -4250,9 +3316,8 @@ double gc_content(gene *t)
      while (s < se) ngc += score[*s++]; }
   return(ngc/(double)t->nbase); }
 
-
-void write_seq(FILE *f, int *seq, int newline)
-{ int i,c;
+void write_seq(FILE *f, int *seq, int newline) {
+  int i,c;
   i = 0;
   while ((c = *seq++) >= Adenine)
    { fputc(cbase(c),f);
@@ -4262,9 +3327,8 @@ void write_seq(FILE *f, int *seq, int newline)
          i = 0; }}
   if (i > 0) fputc('\n',f); }
 
-
-int find_var_hairpin(gene *t)
-{ int e,stem,vstem,loop,*sn,*sen,*pos1,*pos2,*sb,*se,*sc,*sd,*sf,*s;
+int find_var_hairpin(gene *t){
+  int e,stem,vstem,loop,*sn,*sen,*pos1,*pos2,*sb,*se,*sc,*sd,*sf,*s;
   unsigned int c,cn,m;
   static unsigned int A[6] = { 0,0,0x100,0x400,0,0 };
   static unsigned int C[6] = { 0,0,0x400,0,0,0 };
@@ -4324,10 +3388,8 @@ int find_var_hairpin(gene *t)
   else
    return(0); }
 
-
-
-void write_to_library(FILE *f, gene *t, csw *sw)
-{ int *s;
+void write_to_library(FILE *f, gene *t, csw *sw){
+  int *s;
   static char trnatype[2][6] = { "tRNA","mtRNA" };
   s = t->seq + t->anticodon;
   fprintf(f,">%s",t->name);
@@ -4400,20 +3462,13 @@ void write_to_library(FILE *f, gene *t, csw *sw)
   fprintf(f,"tloop = %d\n",t->tloop);
   fprintf(f,"gc = %g\n\n",gc_content(t)); }
 
-
-
-void init_tmrna(FILE *f, csw *sw)
-{ int c,*s;
+void init_tmrna(FILE *f, csw *sw){
+  int c,*s;
   s = sw->tmrna_struct;
   while ((c = *s++) != TERM) itmparam(cbase(c),f); }
 
-
-
-
-
-int *make_tv(int *seq, char matrix[][MATY],
-             int *x, int *y, int orient, int tv)
-{ int i,px,py,stem;
+int *make_tv(int *seq, char matrix[][MATY], int *x, int *y, int orient, int tv){
+  int i,px,py,stem;
   static int ux[4] = { 1,0,-1,0 };
   static int uy[4] = { 0,1,0,-1 };
   static int vx[4] = { 0,-1,0,1 };
@@ -4507,9 +3562,8 @@ int *make_tv(int *seq, char matrix[][MATY],
   *y = py;
   return(seq); }
 
-
-int base_match(char b1, char b2)
-{ int i,s;
+int base_match(char b1, char b2){
+  int i,s;
   static char base1[11] = "acgtgtagtg";
   static char base2[11] = "tgcatggatg";
   static int score[11] = { 2,2,2,2,1,1,3,3,3,3 };
@@ -4521,10 +3575,8 @@ int base_match(char b1, char b2)
        break; }
   return(s); }
 
-
-int *make_clover(int *seq, int b, int e, int stemlength,
-                  char matrix[][MATY], int *x, int *y, int orient)
-{ int i,px,py,pxb,pyb,pxe,pye,l,xlg,xlgd,ylgh,ylg;
+int *make_clover(int *seq, int b, int e, int stemlength, char matrix[][MATY], int *x, int *y, int orient){
+  int i,px,py,pxb,pyb,pxe,pye,l,xlg,xlgd,ylgh,ylg;
   int *s,*se;
   static int ux[9] = { 1,0,-1,0,0,1,1,-1,-1 };
   static int uy[9] = { 0,1,0,-1,1,-1,1,1,-1 };
@@ -4675,13 +3727,8 @@ int *make_clover(int *seq, int b, int e, int stemlength,
   *y = py;
   return(se); }
 
-
-
-
-
-int *make_dv(int *seq, char matrix[][MATY], int dloop,
-                  int orient, int *xp, int *yp)
-{ int i,x,y;
+int *make_dv(int *seq, char matrix[][MATY], int dloop, int orient, int *xp, int *yp){
+  int i,x,y;
   static int ux[5] = { 1,0,-1,0,0 };
   static int uy[5] = { 0,1,0,-1,1 };
   static int vx[5] = { 0,-1,0,1,1 };
@@ -4750,10 +3797,8 @@ int *make_dv(int *seq, char matrix[][MATY], int dloop,
   *yp = y;
   return(seq); }
 
-
-int *make_var(int *seq, char matrix[][MATY],
-               int *x, int *y, int orient, int var, int varbp)
-{ int i,b,e,p,px,py,pxf,pyf,l,stem;
+int *make_var(int *seq, char matrix[][MATY], int *x, int *y, int orient, int var, int varbp){
+  int i,b,e,p,px,py,pxf,pyf,l,stem;
   static int ux[4] = { 1,0,-1,0 };
   static int uy[4] = { 0,1,0,-1 };
   static int vx[4] = { 0,-1,0,1 };
@@ -4849,12 +3894,8 @@ int *make_var(int *seq, char matrix[][MATY],
   FIN:
   return(seq); }
 
-
-
-
-
-void remove_inserts(int *s1, int *s2)
-{ int flag,c;
+void remove_inserts(int *s1, int *s2) {
+  int flag,c;
   flag = 0;
   while ((c = *s1++) != TERM)
    { if (c == INSERT)
@@ -4864,10 +3905,8 @@ void remove_inserts(int *s1, int *s2)
      *s2++ = c; }
   *s2 = TERM; }
 
-
-
-void build_trna(gene *t, char matrix[][MATY], int x, int y, csw *sw)
-{ int i,j,e,c,*seq;
+void build_trna(gene *t, char matrix[][MATY], int x, int y, csw *sw){
+  int i,j,e,c,*seq;
   int rseq[150];
   static char bond2[5] = " +-.";
   t->varbp = find_var_hairpin(t);
@@ -4937,12 +3976,8 @@ void build_trna(gene *t, char matrix[][MATY], int x, int y, csw *sw)
     x++;
     i++; }}
 
-
-
-
-
-void build_tmrna(gene *t, char matrix[][MATY], int x, int y, csw *sw)
-{ int i,j,e,c,tarm,*seq;
+void build_tmrna(gene *t, char matrix[][MATY], int x, int y, csw *sw){
+  int i,j,e,c,tarm,*seq;
   int rseq[2*MAXTMRNALEN+1];
   static char bond2[5] = " +-.";
   remove_inserts(t->eseq,rseq);
@@ -4987,15 +4022,13 @@ void build_tmrna(gene *t, char matrix[][MATY], int x, int y, csw *sw)
     x++;
     i++; } }
 
-
-void init_matrix(char matrix[][MATY])
-{ int i,j;
+void init_matrix(char matrix[][MATY]) {
+  int i,j;
   for (i =0; i < MATY; i++)
    for (j = 0; j < MATX; j++) matrix[j][i] = ' '; }
 
-
-void disp_matrix(FILE *f, char matrix[][MATY], int ylines)
-{ int i,j,k;
+void disp_matrix(FILE *f, char matrix[][MATY], int ylines){
+  int i,j,k;
   i = ylines;
   while (--i >= 0)
    { k = MATX;
@@ -5004,9 +4037,8 @@ void disp_matrix(FILE *f, char matrix[][MATY], int ylines)
      fputc('\n',f); }
   fputc('\n',f); }
 
-
-void xcopy(char m[][MATY], int x, int y, char *s, int l)
-{ int i;
+void xcopy(char m[][MATY], int x, int y, char *s, int l) {
+  int i;
   char c;
   i = 0;
   while (i < l)
@@ -5015,11 +4047,8 @@ void xcopy(char m[][MATY], int x, int y, char *s, int l)
      m[x++][y] = c;
      i++; }}
 
-
-
-
-int identify_tag(char tag[], int len, char (*thit)[50], int nt)
-{ int i,n;
+int identify_tag(char tag[], int len, char (*thit)[50], int nt) {
+  int i,n;
   char *s,*st,*sb,*sd;
   n = 0;
   st = tag + len;
@@ -5047,106 +4076,94 @@ int identify_tag(char tag[], int len, char (*thit)[50], int nt)
   MANY:
   return(-1);  }
 
+int peptide_tag(char tag[], int maxlen, gene *t, csw *sw) {
+  int i,lx,*se;
+  se = t->eseq + t->tps;
+  lx = (t->tpe - t->tps + 1);
+  if (ltranslate(se+lx,t,sw) == '*')
+   { lx += 3;
+     if (ltranslate(se+lx,t,sw) == '*') lx += 3; }
+  lx /= 3;
+  if (lx > maxlen) lx = maxlen;
+  for (i = 0; i < lx; i++)
+   { tag[i] = ltranslate(se,t,sw);
+     se += 3; }
+  tag[i] = '\0';
+  return(lx); }
 
+void update_tmrna_tag_database(gene ts[], int nt, csw *sw) {
+  int nn,i,k,c,lx;
+  char *sp,*se,*s;
+  char species[STRLEN],tag[100];
+  gene *t;
+  if (sw->tagend >= NTAGMAX) return;
+  for (i = 0; i < nt; i++)
+   { t = ts + i;
+     if (t->genetype != tmRNA) continue;
+     s = t->name;
+     se = NULL;
+     while (*s)
+      { if (*s == '|') se = s;
+        s++; }
+     if (!*se) continue;
+     while (++se) if (space(*se)) break;
+     if (!*se) continue;
+     while (++se) if (!space(*se)) break;
+     if (!*se) continue;
+     if (softstrpos(se," sp. "))
+      { if (!(sp = softstrpos(se,"two-piece")))
+         if (!(sp = softstrpos(se,"tmRNA")))
+          continue;
+        while (space(sp[-1])) sp--;
+        copy2sp(se,sp,species,49); }
+     else
+      { s = species;
+        c = 2;
+        while (*se)
+         { if (space(*se))
+           if (--c <= 0) break;
+           *s++ = *se++; }
+        *s = '\0'; }
+     for (k = 0; k < sw->tagend; k++)
+      if (softstrpos(tagdatabase[k].name,species)) break;
+     if (k < sw->tagend) continue;
+     copy(species,tagdatabase[sw->tagend].name);
+     s = tag;
+     lx = peptide_tag(s,50,t,sw);
+     s += (lx - 1);
+     while (*s == '*') s--;
+     *++s = '\0';
+     copy(tag,tagdatabase[sw->tagend].tag);
+     if (++sw->tagend >= NTAGMAX) break; } }
 
-int peptide_tag(char tag[], int maxlen, gene *t, csw *sw)
-{
-int i,lx,*se;
-se = t->eseq + t->tps;
-lx = (t->tpe - t->tps + 1);
-if (ltranslate(se+lx,t,sw) == '*')
- { lx += 3;
-   if (ltranslate(se+lx,t,sw) == '*') lx += 3; }
-lx /= 3;
-if (lx > maxlen) lx = maxlen;
-for (i = 0; i < lx; i++)
- { tag[i] = ltranslate(se,t,sw);
-   se += 3; }
-tag[i] = '\0';
-return(lx);
-}
+int string_compare(char *s1, char *s2) {
+  int r;
+  char c1,c2;
+  r = 0;
+  while (c1 = *s1++)
+   { if (!(c2 = *s2++)) break;
+     r = (int)upcasec(c1) - (int)upcasec(c2);
+     if (r != 0) break; }
+  return(r); }
 
+void report_new_tmrna_tags(csw *sw) {
+  int k,n,sort[NTAGMAX];
+  for (n = 0; n < sw->tagend; n++)
+   { k = n;
+     while (--k >= 0)
+      { if (string_compare(tagdatabase[n].name,tagdatabase[sort[k]].name) >= 0) break;
+        sort[k+1] = sort[k]; }
+     sort[++k] = n; }
+  fprintf(sw->f,"\ntmRNA tag database update:\n");
+  for (k = 0; k < sw->tagend; k++)
+   { n = sort[k];
+     fprintf(sw->f,"     { \"%s\",\"%s\"},\n",
+           tagdatabase[n].name,tagdatabase[n].tag); }
+  fprintf(sw->f,"\n%d tmRNA peptide tags\n",sw->tagend);
+  fprintf(sw->f,"%d new tmRNA peptide tags\n\n",sw->tagend - NTAG); }
 
-void update_tmrna_tag_database(gene ts[], int nt, csw *sw)
-{
-int nn,i,k,c,lx;
-char *sp,*se,*s;
-char species[STRLEN],tag[100];
-gene *t;
-if (sw->tagend >= NTAGMAX) return;
-for (i = 0; i < nt; i++)
- { t = ts + i;
-   if (t->genetype != tmRNA) continue;
-   s = t->name;
-   se = NULL;
-   while (*s)
-    { if (*s == '|') se = s;
-      s++; }
-   if (!*se) continue;
-   while (++se) if (space(*se)) break;
-   if (!*se) continue;
-   while (++se) if (!space(*se)) break;
-   if (!*se) continue;
-   if (softstrpos(se," sp. "))
-    { if (!(sp = softstrpos(se,"two-piece")))
-       if (!(sp = softstrpos(se,"tmRNA")))
-        continue;
-      while (space(sp[-1])) sp--;
-      copy2sp(se,sp,species,49); }
-   else
-    { s = species;
-      c = 2;
-      while (*se)
-       { if (space(*se))
-         if (--c <= 0) break;
-         *s++ = *se++; }
-      *s = '\0'; }
-   for (k = 0; k < sw->tagend; k++)
-    if (softstrpos(tagdatabase[k].name,species)) break;
-   if (k < sw->tagend) continue;
-   copy(species,tagdatabase[sw->tagend].name);
-   s = tag;
-   lx = peptide_tag(s,50,t,sw);
-   s += (lx - 1);
-   while (*s == '*') s--;
-   *++s = '\0';
-   copy(tag,tagdatabase[sw->tagend].tag);
-   if (++sw->tagend >= NTAGMAX) break; }
-}
-
-int string_compare(char *s1, char *s2)
-{
-int r;
-char c1,c2;
-r = 0;
-while (c1 = *s1++)
- { if (!(c2 = *s2++)) break;
-   r = (int)upcasec(c1) - (int)upcasec(c2);
-   if (r != 0) break; }
-return(r);
-}
-
-void report_new_tmrna_tags(csw *sw)
-{
-int k,n,sort[NTAGMAX];
-for (n = 0; n < sw->tagend; n++)
- { k = n;
-   while (--k >= 0)
-    { if (string_compare(tagdatabase[n].name,tagdatabase[sort[k]].name) >= 0) break;
-      sort[k+1] = sort[k]; }
-   sort[++k] = n; }
-fprintf(sw->f,"\ntmRNA tag database update:\n");
-for (k = 0; k < sw->tagend; k++)
- { n = sort[k];
-   fprintf(sw->f,"     { \"%s\",\"%s\"},\n",
-         tagdatabase[n].name,tagdatabase[n].tag); }
-fprintf(sw->f,"\n%d tmRNA peptide tags\n",sw->tagend);
-fprintf(sw->f,"%d new tmRNA peptide tags\n\n",sw->tagend - NTAG);
-}
-
-
-void disp_peptide_tag(FILE *f, gene *t, csw *sw)
-{ int i,lx,nm,nmh,c1,c2,c3,*s,*se;
+void disp_peptide_tag(FILE *f, gene *t, csw *sw) {
+  int i,lx,nm,nmh,c1,c2,c3,*s,*se;
   char tag[52],thit[21][50];
   fprintf(f,"Tag peptide at [%d,%d]\nTag sequence: ",t->tps+1,t->tpe+1);
   lx = peptide_tag(tag,50,t,sw);
@@ -5198,9 +4215,8 @@ void disp_peptide_tag(FILE *f, gene *t, csw *sw)
     fprintf(f,"Tag not identified\n");
   fputc('\n',f);  }
 
-
-void sense_switch(int *seq1, int *seq2, int lseq)
-{ int i,b;
+void sense_switch(int *seq1, int *seq2, int lseq) {
+  int i,b;
   int *sseq,*cseq;
   sseq = seq1;
   cseq = seq2 + lseq;
@@ -5214,9 +4230,8 @@ void sense_switch(int *seq1, int *seq2, int lseq)
            else *cseq = NOBASE; }}
      else *cseq = NOBASE; }}
 
-
-double nenergy(gene *t, csw *sw)
-{ double eref;
+double nenergy(gene *t, csw *sw) {
+  double eref;
   if (t->genetype != tRNA) eref = sw->eref[t->genetype];
   else
    if (sw->mtrna)
@@ -5227,9 +4242,8 @@ double nenergy(gene *t, csw *sw)
    else eref = sw->eref[tRNA];
   return(100.0*t->energy/eref); }
 
-
-char *position(char *s, gene *t, csw *sw)
-{ long start;
+char *position(char *s, gene *t, csw *sw) {
+  long start;
   start = t->start;
   if (sw->linear) if (start <= 0) start--;
   if (t->comp)
@@ -5238,18 +4252,16 @@ char *position(char *s, gene *t, csw *sw)
    sprintf(s,"[%ld,%ld]",start,t->stop);
   return(s); }
 
-
-void location(char *s, gene *t, csw *sw, char *m)
-{ char sp[80];
+void location(char *s, gene *t, csw *sw, char *m){
+  char sp[80];
   sprintf(s,"%s %s",m,position(sp,t,sw)); }
 
-void disp_location(gene *t, csw *sw, char *m)
-{ char sp[80];
+void disp_location(gene *t, csw *sw, char *m) {
+  char sp[80];
   fprintf(sw->f,"%s %s\n",m,position(sp,t,sw)); }
 
-
-char *name(gene *t, char *si, int proc, csw *sw)
-{ int s[5],*ss,*sin,*sm,*s0,*s1,*s2,*s3,nintron;
+char *name(gene *t, char *si, int proc, csw *sw) {
+  int s[5],*ss,*sin,*sm,*s0,*s1,*s2,*s3,nintron;
   char *sb,*st;
   static char trnatype[2][6] = { "tRNA","mtRNA" };
   switch (t->genetype)
@@ -5314,9 +4326,8 @@ char *name(gene *t, char *si, int proc, csw *sw)
               break; }
   return(si); }
 
-
-void disp_intron(FILE *f, gene *t, csw *sw)
-{ int i,c,*s,*sb,*se;
+void disp_intron(FILE *f, gene *t, csw *sw) {
+  int i,c,*s,*sb,*se;
   char genename[100];
   if (t->nintron <= 0) return;
   name(t,genename,1,sw);
@@ -5344,9 +4355,8 @@ void disp_intron(FILE *f, gene *t, csw *sw)
   fputc('\n',f);
   fputc('\n',f); }
 
-
-void disp_fasta_seq(FILE *f, gene *t, int ns, int n, int nsp, int c, csw *sw)
-{ int i,*s,*se;
+void disp_fasta_seq(FILE *f, gene *t, int ns, int n, int nsp, int c, csw *sw) {
+  int i,*s,*se;
   char genename[100],genepos[100];
   if (t->nintron > 0)
    { s = t->eseq;
@@ -5371,9 +4381,8 @@ void disp_fasta_seq(FILE *f, gene *t, int ns, int n, int nsp, int c, csw *sw)
         i = 0; }}
   if (i > 0) fputc('\n',f); }
 
-
-void disp_seq(FILE *f, gene *t, csw *sw)
-{ int i,*s,*se;
+void disp_seq(FILE *f, gene *t, csw *sw) {
+  int i,*s,*se;
   char genename[100];
   if (sw->seqdisp >= 3)
    { if (!sw->batch) fputc('\n',f);
@@ -5399,249 +4408,235 @@ void disp_seq(FILE *f, gene *t, csw *sw)
      if (i > 0) fputc('\n',f); }
   if (!sw->batch)
    { fputc('\n',f);
-     fputc('\n',f); }
-}
+     fputc('\n',f); } }
 
+void disp_gene_SVG(gene *t, char m[][MATY], csw *sw) {
+  int i,x,y,xb,xe,yb,ye,xbm,xem,ybm,yem,xdiff,ydiff;
+  double xpos,ypos,xsc,ysc,fontsize,yv;
+  char genename[100];
+  FILE *f = sw->f;
+  xe = 0;
+  xb = MATX;
+  ye = 0;
+  yb = MATY;
+  for (y = 5; y <= 30; y++)
+   { for (x = 0; x < MATX; x++)
+      { if ((m[x][y] > ' ') && (m[x][y] <= '~'))
+         { if (x < xb) xb = x;
+           if (x > xe) xe = x;
+           if (y < yb) yb = y;
+           if (y > ye) ye = y; }}}
+  xbm = xb - 5;
+  if (xbm < 0) xbm = 0;
+  xem = xe + 5;
+  if (xem >= MATX) xem = MATX - 1;
+  if ((xb - xbm) > (xem - xe)) xbm = xb - (xem - xe);
+  else xem = xe + (xb - xbm);
+  xdiff = xem - xbm;
+  ybm = yb - 5;
+  if (ybm < 5) ybm = 5;
+  yem = ye + 5;
+  if (yem > 30) yem = 30;
+  if ((yb - ybm) > (yem - ye)) ybm = yb - (yem - ye);
+  else yem = ye + (yb - ybm);
+  xdiff = xem - xbm;
+  ydiff = yem - ybm + 4;
+  ysc = 10.0;
+  xsc = 0.1*(double)((int)(10.0*ysc*((double)xdiff/(double)ydiff) + 0.5));
+  fontsize = 1.4;
+  yv = 0.01*(double)((int)(18.5*(double)ydiff*fontsize/ysc + 0.5));
+  name(t,genename,1,sw);
+  if (!sw->batch) fprintf(f,"Scalable vector graphics (SVG) image:\n");
+  fprintf(f,"<svg xmlns='http://www.w3.org/2000/svg' version='1.1' ");
+  fprintf(f,"width='%gcm' height='%gcm' viewBox='0 0 %d %d'>\n",xsc,ysc,xdiff,ydiff);
+  fprintf(f,"<title>%s</title>\n",genename);
+  fprintf(f,"<g font-family='Courier New,Courier,monospace' font-size='%g' ",fontsize);
+  fprintf(f,"text-anchor='middle' fill='black' stroke='none'>\n");
+  i = 0;
+  for (y = ybm; y <= yem; y++)
+   { ypos = (double)(ydiff - 2 - (y - ybm));
+     for (x = xbm; x <= xem; x++)
+      { if ((m[x][y] > ' ') && (m[x][y] <= '~') && (m[x][y] != '!'))
+         { xpos = (double)(x - xbm);
+           fprintf(f,"<text x='%g' y='%g'>%c</text>",xpos,ypos,m[x][y]);
+           if (++i >= 4)
+            { fputc('\n',f);
+              i = 0; }}}}
+  if (i > 0) fputc('\n',f);
+  fprintf(f,"</g><g fill='none' stroke='black' stroke-width='0.075'>\n");
+  i = 0;
+  for (y = ybm; y <= yem; y++)
+   { ypos = (double)(ydiff - 2 - (y - ybm));
+     for (x = xbm; x <= xem; x++)
+      { if ((m[x][y] == '!'))
+         { xpos = (double)(x - xbm);
+           fprintf(f,"<line x1='%g' y1='%g' x2='%g' y2='%g'/>",xpos,ypos,xpos,ypos-yv);
+           if (++i >= 2)
+            { fputc('\n',f);
+              i = 0; }}}}
+  if (i > 0) fputc('\n',f);
+  fprintf(f,"</g></svg>\n"); }
 
-void disp_gene_SVG(gene *t, char m[][MATY], csw *sw)
-{
-int i,x,y,xb,xe,yb,ye,xbm,xem,ybm,yem,xdiff,ydiff;
-double xpos,ypos,xsc,ysc,fontsize,yv;
-char genename[100];
-FILE *f = sw->f;
-xe = 0;
-xb = MATX;
-ye = 0;
-yb = MATY;
-for (y = 5; y <= 30; y++)
- { for (x = 0; x < MATX; x++)
-    { if ((m[x][y] > ' ') && (m[x][y] <= '~'))
-       { if (x < xb) xb = x;
-         if (x > xe) xe = x;
-         if (y < yb) yb = y;
-         if (y > ye) ye = y; }}}
-xbm = xb - 5;
-if (xbm < 0) xbm = 0;
-xem = xe + 5;
-if (xem >= MATX) xem = MATX - 1;
-if ((xb - xbm) > (xem - xe)) xbm = xb - (xem - xe);
-else xem = xe + (xb - xbm);
-xdiff = xem - xbm;
-ybm = yb - 5;
-if (ybm < 5) ybm = 5;
-yem = ye + 5;
-if (yem > 30) yem = 30;
-if ((yb - ybm) > (yem - ye)) ybm = yb - (yem - ye);
-else yem = ye + (yb - ybm);
-xdiff = xem - xbm;
-ydiff = yem - ybm + 4;
-ysc = 10.0;
-xsc = 0.1*(double)((int)(10.0*ysc*((double)xdiff/(double)ydiff) + 0.5));
-fontsize = 1.4;
-yv = 0.01*(double)((int)(18.5*(double)ydiff*fontsize/ysc + 0.5));
-name(t,genename,1,sw);
-if (!sw->batch) fprintf(f,"Scalable vector graphics (SVG) image:\n");
-fprintf(f,"<svg xmlns='http://www.w3.org/2000/svg' version='1.1' ");
-fprintf(f,"width='%gcm' height='%gcm' viewBox='0 0 %d %d'>\n",xsc,ysc,xdiff,ydiff);
-fprintf(f,"<title>%s</title>\n",genename);
-fprintf(f,"<g font-family='Courier New,Courier,monospace' font-size='%g' ",fontsize);
-fprintf(f,"text-anchor='middle' fill='black' stroke='none'>\n");
-i = 0;
-for (y = ybm; y <= yem; y++)
- { ypos = (double)(ydiff - 2 - (y - ybm));
-   for (x = xbm; x <= xem; x++)
-    { if ((m[x][y] > ' ') && (m[x][y] <= '~') && (m[x][y] != '!'))
-       { xpos = (double)(x - xbm);
-         fprintf(f,"<text x='%g' y='%g'>%c</text>",xpos,ypos,m[x][y]);
-         if (++i >= 4)
-          { fputc('\n',f);
-            i = 0; }}}}
-if (i > 0) fputc('\n',f);
-fprintf(f,"</g><g fill='none' stroke='black' stroke-width='0.075'>\n");
-i = 0;
-for (y = ybm; y <= yem; y++)
- { ypos = (double)(ydiff - 2 - (y - ybm));
-   for (x = xbm; x <= xem; x++)
-    { if ((m[x][y] == '!'))
-       { xpos = (double)(x - xbm);
-         fprintf(f,"<line x1='%g' y1='%g' x2='%g' y2='%g'/>",xpos,ypos,xpos,ypos-yv);
-         if (++i >= 2)
-          { fputc('\n',f);
-            i = 0; }}}}
-if (i > 0) fputc('\n',f);
-fprintf(f,"</g></svg>\n");
-}
-
-
-void disp_trna_bracket_notation(FILE *f, gene *t, csw *sw)
-{
-int i,j,k,varbp,stem,ab,ae,hl,*s,*se,*sl,*sb,*sr;
-char genename[100];
-static int bplb[2] = { '.','(' };
-static int bprb[2] = { '.',')' };
-if (!sw->batch)
- { name(t,genename,1,sw);
-   fprintf(f,"\nSecondary structure (bracket notation) for %s\n",genename); }
-if (t->nintron > 0)
- { s = t->eseq;
-   se = s + t->nbase + t->nintron; }
-else
- { s = t->seq;
-   se = s + t->nbase; }
-sl = s;
-while (sl < se) fputc(cbase(*sl++),f);
-fputc('\n',f);
-sl = s;
-sr = se - t->aatail - 1;
-for (i = 0; i < t->astem1; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-for (i = 0; i < t->spacer1; i++) fputc('s',f);
-sl += t->spacer1;
-sb = sl + t->dstem - 1;
-sr = sb + t->dstem + t->dloop;
-for (i = 0; i < t->dstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-for (i = 0; i < t->dloop; i++) fputc('d',f);
-sl += t->dloop;
-for (i = 0; i < t->dstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-for (i = 0; i < t->spacer2; i++) fputc('s',f);
-sl += t->spacer2;
-sb = sl + t->cstem - 1;
-sr = sb + t->cstem + t->cloop + t->nintron;
-for (i = 0; i < t->cstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-hl = t->astem1 + t->spacer1 + 2*t->dstem + t->dloop +
-     t->spacer2 + t->cstem;
-if (t->nintron > 0)
- { j = t->intron - hl;
-   ab = t->anticodon - hl;
-   ae = ab + t->cloop - 5;
-   for (i = 0; i < j; i++)
+void disp_trna_bracket_notation(FILE *f, gene *t, csw *sw) {
+  int i,j,k,varbp,stem,ab,ae,hl,*s,*se,*sl,*sb,*sr;
+  char genename[100];
+  static int bplb[2] = { '.','(' };
+  static int bprb[2] = { '.',')' };
+  if (!sw->batch)
+   { name(t,genename,1,sw);
+     fprintf(f,"\nSecondary structure (bracket notation) for %s\n",genename); }
+  if (t->nintron > 0)
+   { s = t->eseq;
+     se = s + t->nbase + t->nintron; }
+  else
+   { s = t->seq;
+     se = s + t->nbase; }
+  sl = s;
+  while (sl < se) fputc(cbase(*sl++),f);
+  fputc('\n',f);
+  sl = s;
+  sr = se - t->aatail - 1;
+  for (i = 0; i < t->astem1; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+  for (i = 0; i < t->spacer1; i++) fputc('s',f);
+  sl += t->spacer1;
+  sb = sl + t->dstem - 1;
+  sr = sb + t->dstem + t->dloop;
+  for (i = 0; i < t->dstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+  for (i = 0; i < t->dloop; i++) fputc('d',f);
+  sl += t->dloop;
+  for (i = 0; i < t->dstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+  for (i = 0; i < t->spacer2; i++) fputc('s',f);
+  sl += t->spacer2;
+  sb = sl + t->cstem - 1;
+  sr = sb + t->cstem + t->cloop + t->nintron;
+  for (i = 0; i < t->cstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+  hl = t->astem1 + t->spacer1 + 2*t->dstem + t->dloop +
+       t->spacer2 + t->cstem;
+  if (t->nintron > 0)
+   { j = t->intron - hl;
+     ab = t->anticodon - hl;
+     ae = ab + t->cloop - 5;
+     for (i = 0; i < j; i++)
+       if (i <= ae)
+        if (i >= ab) fputc('A',f);
+        else fputc('c',f);
+       else fputc('c',f);
+     for (i = 0; i < t->nintron; i++) fputc('i',f);
+     for (i = j; i < t->cloop; i++)
      if (i <= ae)
       if (i >= ab) fputc('A',f);
       else fputc('c',f);
-     else fputc('c',f);
-   for (i = 0; i < t->nintron; i++) fputc('i',f);
-   for (i = j; i < t->cloop; i++)
-   if (i <= ae)
-    if (i >= ab) fputc('A',f);
-    else fputc('c',f);
-   else fputc('c',f); }
-else
-  { j = t->cloop - 4;
-    ab = t->anticodon - hl;
-    ae = t->cloop - ab - j;
-    for (i = 0; i < ab; i++) fputc('c',f);
-    for (i = 0; i < j; i++) fputc('A',f);
-    for (i = 0; i < ae; i++) fputc('c',f); }
-sl += (t->cloop + t->nintron);
-for (i = 0; i < t->cstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-varbp = find_var_hairpin(t);
-if (varbp > 0)
- { j = (varbp >> 10);
-   k = (varbp >> 5) & 0x1f;
-   stem = (varbp & 0x1f);
-   sr = sl + k + stem - 1;
-   sl += j;
-   sb = sl + stem - 1;
-   for (i = 0; i < j; i++) fputc('s',f);
-   for (i = 0; i < stem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-   for (i = j+stem; i < k; i++,sl++) fputc('v',f);
-   for (i = 0; i < stem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-   for (i = k+stem; i < t->var; i++,sl++) fputc('s',f); }
-else
- { for (i = 0; i < t->var; i++) fputc('v',f);
-   sl += t->var; }
-sb = sl + t->tstem - 1;
-sr = sb + t->tstem + t->tloop;
-for (i = 0; i < t->tstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-for (i = 0; i < t->tloop; i++) fputc('t',f);
-sl += t->tloop;
-for (i = 0; i < t->tstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-sb = s + t->astem1 - 1;
-for (i = 0; i < t->astem2; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-fputc('\n',f);
-if (!sw->batch) fputc('\n',f);
-}
+     else fputc('c',f); }
+  else
+    { j = t->cloop - 4;
+      ab = t->anticodon - hl;
+      ae = t->cloop - ab - j;
+      for (i = 0; i < ab; i++) fputc('c',f);
+      for (i = 0; i < j; i++) fputc('A',f);
+      for (i = 0; i < ae; i++) fputc('c',f); }
+  sl += (t->cloop + t->nintron);
+  for (i = 0; i < t->cstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+  varbp = find_var_hairpin(t);
+  if (varbp > 0)
+   { j = (varbp >> 10);
+     k = (varbp >> 5) & 0x1f;
+     stem = (varbp & 0x1f);
+     sr = sl + k + stem - 1;
+     sl += j;
+     sb = sl + stem - 1;
+     for (i = 0; i < j; i++) fputc('s',f);
+     for (i = 0; i < stem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+     for (i = j+stem; i < k; i++,sl++) fputc('v',f);
+     for (i = 0; i < stem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+     for (i = k+stem; i < t->var; i++,sl++) fputc('s',f); }
+  else
+   { for (i = 0; i < t->var; i++) fputc('v',f);
+     sl += t->var; }
+  sb = sl + t->tstem - 1;
+  sr = sb + t->tstem + t->tloop;
+  for (i = 0; i < t->tstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+  for (i = 0; i < t->tloop; i++) fputc('t',f);
+  sl += t->tloop;
+  for (i = 0; i < t->tstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+  sb = s + t->astem1 - 1;
+  for (i = 0; i < t->astem2; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+  fputc('\n',f);
+  if (!sw->batch) fputc('\n',f); }
 
+void disp_tmrna_trnadomain_bracket_notation(FILE *f, gene *t, csw *sw) {
+  int i,j,k,varbp,stem,*s,*sa,*sb,*sc,*sd,*se,*sf,*sl,*sr;
+  static int bplb[2] = { '.','(' };
+  static int bprb[2] = { '.',')' };
+  if (t->nintron <= 0) return;
+  if (!sw->batch)
+   { fprintf(f,"Secondary structure (bracket notation) for tRNA domain:\n"); }
+  s = t->eseq;
+  se = s + t->nbase + t->nintron;
+  if (t->asst > 0)
+   { sc = s + t->asst;
+     sa = sc + t->astem1 + t->dloop + t->cstem;
+     sd = s + 54;
+     sf = s + t->intron; }
+  else
+   { sc = s;
+     sa = s + t->astem1 + t->dloop + t->cstem;
+     sd = se - t->aatail - t->astem2 - 2*t->tstem - t->tloop - t->var - t->cstem;
+     sf = se; }
+  sl = sc;
+  while (sl < sa) fputc(cbase(*sl++),f);
+  fputc('|',f);
+  sr = sd;
+  while (sr < sf) fputc(cbase(*sr++),f);
+  fputc('\n',f);
+  sl = sc;
+  sr = sf - t->aatail - 1;
+  for (i = 0; i < t->astem1; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+  for (i = 0; i < t->spacer1; i++) fputc('s',f);
+  sl += t->spacer1;
+  sb = sl + t->dstem - 1;
+  sr = sb + t->dstem + t->dloop;
+  for (i = 0; i < t->dstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+  for (i = 0; i < t->dloop; i++) fputc('d',f);
+  sl += t->dloop;
+  for (i = 0; i < t->dstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+  for (i = 0; i < t->spacer2; i++) fputc('s',f);
+  sl += t->spacer2;
+  sb = sl + t->cstem - 1;
+  sr = sd + t->cstem - 1;
+  for (i = 0; i < t->cstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+  fputc('|',f);
+  sl = sd;
+  for (i = 0; i < t->cstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+  varbp = find_var_hairpin(t);
+  if (varbp > 0)
+   { j = (varbp >> 10);
+     k = (varbp >> 5) & 0x1f;
+     stem = (varbp & 0x1f);
+     sr = sl + k + stem - 1;
+     sl += j;
+     sb = sl + stem - 1;
+     for (i = 0; i < j; i++) fputc(' ',f);
+     for (i = 0; i < stem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+     for (i = j+stem; i < k; i++,sl++) fputc('v',f);
+     for (i = 0; i < stem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+     for (i = k+stem; i < t->var; i++,sl++) fputc(' ',f); }
+  else
+   { for (i = 0; i < t->var; i++) fputc('v',f);
+     sl += t->var; }
+  sb = sl + t->tstem - 1;
+  sr = sb + t->tstem + t->tloop;
+  for (i = 0; i < t->tstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
+  for (i = 0; i < t->tloop; i++) fputc('t',f);
+  sl += t->tloop;
+  for (i = 0; i < t->tstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+  sb = sc + t->astem1 - 1;
+  for (i = 0; i < t->astem2; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
+  for (i = 0; i < t->aatail; i++) fputc('a',f);
+  fputc('\n',f);
+  if (!sw->batch) fputc('\n',f); }
 
-
-void disp_tmrna_trnadomain_bracket_notation(FILE *f, gene *t, csw *sw)
-{
-int i,j,k,varbp,stem,*s,*sa,*sb,*sc,*sd,*se,*sf,*sl,*sr;
-static int bplb[2] = { '.','(' };
-static int bprb[2] = { '.',')' };
-if (t->nintron <= 0) return;
-if (!sw->batch)
- { fprintf(f,"Secondary structure (bracket notation) for tRNA domain:\n"); }
-s = t->eseq;
-se = s + t->nbase + t->nintron;
-if (t->asst > 0)
- { sc = s + t->asst;
-   sa = sc + t->astem1 + t->dloop + t->cstem;
-   sd = s + 54;
-   sf = s + t->intron; }
-else
- { sc = s;
-   sa = s + t->astem1 + t->dloop + t->cstem;
-   sd = se - t->aatail - t->astem2 - 2*t->tstem - t->tloop - t->var - t->cstem;
-   sf = se; }
-sl = sc;
-while (sl < sa) fputc(cbase(*sl++),f);
-fputc('|',f);
-sr = sd;
-while (sr < sf) fputc(cbase(*sr++),f);
-fputc('\n',f);
-sl = sc;
-sr = sf - t->aatail - 1;
-for (i = 0; i < t->astem1; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-for (i = 0; i < t->spacer1; i++) fputc('s',f);
-sl += t->spacer1;
-sb = sl + t->dstem - 1;
-sr = sb + t->dstem + t->dloop;
-for (i = 0; i < t->dstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-for (i = 0; i < t->dloop; i++) fputc('d',f);
-sl += t->dloop;
-for (i = 0; i < t->dstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-for (i = 0; i < t->spacer2; i++) fputc('s',f);
-sl += t->spacer2;
-sb = sl + t->cstem - 1;
-sr = sd + t->cstem - 1;
-for (i = 0; i < t->cstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-fputc('|',f);
-sl = sd;
-for (i = 0; i < t->cstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-varbp = find_var_hairpin(t);
-if (varbp > 0)
- { j = (varbp >> 10);
-   k = (varbp >> 5) & 0x1f;
-   stem = (varbp & 0x1f);
-   sr = sl + k + stem - 1;
-   sl += j;
-   sb = sl + stem - 1;
-   for (i = 0; i < j; i++) fputc(' ',f);
-   for (i = 0; i < stem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-   for (i = j+stem; i < k; i++,sl++) fputc('v',f);
-   for (i = 0; i < stem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-   for (i = k+stem; i < t->var; i++,sl++) fputc(' ',f); }
-else
- { for (i = 0; i < t->var; i++) fputc('v',f);
-   sl += t->var; }
-sb = sl + t->tstem - 1;
-sr = sb + t->tstem + t->tloop;
-for (i = 0; i < t->tstem; i++,sl++,sr--) fputc(bplb[bp[*sl][*sr]],f);
-for (i = 0; i < t->tloop; i++) fputc('t',f);
-sl += t->tloop;
-for (i = 0; i < t->tstem; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-sb = sc + t->astem1 - 1;
-for (i = 0; i < t->astem2; i++,sl++,sb--) fputc(bprb[bp[*sl][*sb]],f);
-for (i = 0; i < t->aatail; i++) fputc('a',f);
-fputc('\n',f);
-if (!sw->batch) fputc('\n',f);
-}
-
-
-
-
-void disp_tmrna_seq(FILE *f, gene *t, csw *sw)
-{ int i,*s,*sb,*se;
+void disp_tmrna_seq(FILE *f, gene *t, csw *sw) {
+  int i,*s,*sb,*se;
   if (t->nintron <= 0) return;
   if (*(t->name) == '\0') fprintf(f,"tmRNA sequence\n\n");
   else fprintf(f,"tmRNA sequence in %s\n\n",t->name);
@@ -5693,10 +4688,8 @@ void disp_tmrna_seq(FILE *f, gene *t, csw *sw)
   fputc('\n',f);
   disp_peptide_tag(f,t,sw); }
 
-
-
-void disp_tmrna_perm_seq(FILE *f, gene *t, csw *sw)
-{ int i,*s,*sb,*se;
+void disp_tmrna_perm_seq(FILE *f, gene *t, csw *sw) {
+  int i,*s,*sb,*se;
   if (t->nintron <= 0) return;
   if (*(t->name) == '\0') fprintf(f,"tmRNA Sequence\n\n");
   else fprintf(f,"tmRNA sequence in %s\n\n",t->name);
@@ -5761,9 +4754,8 @@ void disp_tmrna_perm_seq(FILE *f, gene *t, csw *sw)
   fputc('\n',f);
   disp_peptide_tag(f,t,sw); }
 
-
-void disp_cds(FILE *f, gene *t, csw *sw)
-{ int i,ncodon,*s,*se;
+void disp_cds(FILE *f, gene *t, csw *sw) {
+  int i,ncodon,*s,*se;
   char c;
   ncodon = t->nbase/3;
   if (!t->tps) ncodon--;
@@ -5791,19 +4783,15 @@ void disp_cds(FILE *f, gene *t, csw *sw)
   fputc('\n',f);
   fputc('\n',f); }
 
+int pseudogene(gene *t, csw *sw) {
+  if (t->energy < sw->reportpsthresh) return(1);
+  if (t->genetype == tRNA)
+   if (t->cloop != 7)
+    return(1);
+  return(0); }
 
-int pseudogene(gene *t, csw *sw)
-{
-if (t->energy < sw->reportpsthresh) return(1);
-if (t->genetype == tRNA)
- if (t->cloop != 7)
-  return(1);
-return(0);
-}
-
-
-void disp_gene(gene *t, char m[][MATY], csw *sw)
-{ double gc;
+void disp_gene(gene *t, char m[][MATY], csw *sw){
+  double gc;
   char stat[80];
   switch(t->genetype)
    { case tmRNA:
@@ -5827,9 +4815,8 @@ void disp_gene(gene *t, char m[][MATY], csw *sw)
    { sprintf(stat,"Score = %g\n",t->energy);
      xcopy(m,4,0,stat,length(stat)); }}
 
-
-void disp_batch_trna(FILE *f, gene *t, csw *sw)
-{ int ls,ps,*s,anticodon;
+void disp_batch_trna(FILE *f, gene *t, csw *sw){
+  int ls,ps,*s,anticodon;
   char pos[50],species[50];
   char m[MATX][MATY];
   static char type[2][6] = { "tRNA","mtRNA" };
@@ -5892,12 +4879,10 @@ void disp_batch_trna(FILE *f, gene *t, csw *sw)
    { init_matrix(m);
      build_trna(t,m,13,27,sw);
      disp_gene_SVG(t,m,sw); }
-  if (sw->seqdisp) disp_seq(f,t,sw);
-}
+  if (sw->seqdisp) disp_seq(f,t,sw); }
 
-
-void disp_batch_tmrna(FILE *f, gene *t, csw *sw)
-{ int ps,tpe,*sb,*se;
+void disp_batch_tmrna(FILE *f, gene *t, csw *sw){
+  int ps,tpe,*sb,*se;
   char pos[50];
   char m[MATX][MATY];
   static char permask[2][2][3] =
@@ -5923,12 +4908,10 @@ void disp_batch_tmrna(FILE *f, gene *t, csw *sw)
    { init_matrix(m);
      build_tmrna(t,m,13,27,sw);
      disp_gene_SVG(t,m,sw); }
-  if (sw->seqdisp) disp_seq(f,t,sw);
-}
+  if (sw->seqdisp) disp_seq(f,t,sw); }
 
-
-void disp_batch_srprna(FILE *f, gene *t, csw *sw)
-{ int ps,tpe,*sb,*se;
+void disp_batch_srprna(FILE *f, gene *t, csw *sw){
+  int ps,tpe,*sb,*se;
   char pos[50];
   static char asterisk[2] = { ' ','*'};
   ps = (t->energy < 100.0)?1:0;
@@ -5939,8 +4922,8 @@ void disp_batch_srprna(FILE *f, gene *t, csw *sw)
   fputc('\n',f);
   if (sw->seqdisp) disp_seq(f,t,sw); }
 
-void disp_batch_cds(FILE *f, gene *t, csw *sw)
-{ int ps,tpe,*sb,*se;
+void disp_batch_cds(FILE *f, gene *t, csw *sw){
+  int ps,tpe,*sb,*se;
   char pos[50];
   static char asterisk[2] = { ' ','*'};
   ps = (t->energy < 100.0)?1:0;
@@ -5951,8 +4934,8 @@ void disp_batch_cds(FILE *f, gene *t, csw *sw)
   fputc('\n',f);
   if (sw->seqdisp) disp_seq(f,t,sw); }
 
-double vloop_stability(int *sb, int var, int *varbp)
-{ int e,stem,vstem,loop,*sn,*sen,*pos1,*pos2,*se,*sc,*sd,*sf,*s;
+double vloop_stability(int *sb, int var, int *varbp){
+  int e,stem,vstem,loop,*sn,*sen,*pos1,*pos2,*se,*sc,*sd,*sf,*s;
   unsigned int c,cn,m;
   static unsigned int A[6] = { 0,0,0x100,0x400,0,0 };
   static unsigned int C[6] = { 0,0,0x400,0,0,0 };
@@ -6010,10 +4993,8 @@ double vloop_stability(int *sb, int var, int *varbp)
    { *varbp = 0;
      return(-12.0); }}
 
-
-
-double find_tag_upstream_hairpin(int *se)
-{ int *sb,*sd,*sf,*sh,*s;
+double find_tag_upstream_hairpin(int *se){
+  int *sb,*sd,*sf,*sh,*s;
   unsigned int c,m,mx;
   static unsigned int A[6] = { 0,0,0,0x10000,0,0 };
   static unsigned int C[6] = { 0,0,0x10000,0,0,0 };
@@ -6053,10 +5034,8 @@ double find_tag_upstream_hairpin(int *se)
   FND:
   return(15.0); }
 
-
-
-double find_taghairpin(int *seq)
-{ int i,*s,*sb,*se,*sf;
+double find_taghairpin(int *seq){
+  int i,*s,*sb,*se,*sf;
   unsigned int c,m,mx;
   static unsigned int A[6] = { 0,0,0,1,0,0 };
   static unsigned int C[6] = { 0,0,1,0,0,0 };
@@ -6096,8 +5075,8 @@ double find_taghairpin(int *seq)
         if (c > mx) mx = c; }}
   return((double)(mx << 1)); }
 
-double stem_energy(int *s1, int *s2, int stem)
-{ int *se;
+double stem_energy(int *s1, int *s2, int stem){
+  int *se;
   double energy;
   static double bem[6][6] =
    { { -1.072,-0.214,-1.072, ATBOND, 0.000, 0.000 },
@@ -6112,8 +5091,8 @@ double stem_energy(int *s1, int *s2, int stem)
    energy += bem[*s1++][*--s2];
   return(energy); }
 
-double astem_energy(int *s1, int *s2, int stem)
-{ int *se;
+double astem_energy(int *s1, int *s2, int stem){
+  int *se;
   double energy;
   static double abem[6][6] =
    { { -2.144,-0.428,-2.144, ATBOND, 0.000, 0.000 },
@@ -6128,9 +5107,8 @@ double astem_energy(int *s1, int *s2, int stem)
    energy += abem[*s1++][*--s2];
   return(energy); }
 
-
-void trna_score(FILE *f, gene *t)
-{ int *s,*tpos,tarm,varbp;
+void trna_score(FILE *f, gene *t) {
+  int *s,*tpos,tarm,varbp;
   double ea,eta,evls;
   static double bem[6][6] =
    { { -2.144,-0.428,-2.144, ATBOND, 0.000, 0.000 },
@@ -6167,10 +5145,9 @@ void trna_score(FILE *f, gene *t)
   fprintf(f,"          V-loop stability: %g\n",evls);
   fprintf(f,"\n"); }
 
-
 // SCORE: tmRNA
-void tmrna_score(FILE *f, gene *t, csw *sw)
-{ int r,j,te,*s,*sb,*se,*tpos,tarm;
+void tmrna_score(FILE *f, gene *t, csw *sw) {
+  int r,j,te,*s,*sb,*se,*tpos,tarm;
   double e,er,et,eal,esp,ed,ec,ea,egga,etcca,egg,eta,edgg;
   double ehairpin,euhairpin;
   static int gtem[6] = { 0x00,0x00,0x11,0x00,0x00,0x00 };
@@ -6308,14 +5285,27 @@ void tmrna_score(FILE *f, gene *t, csw *sw)
   fprintf(f,"          Normalised score: %g\n",nenergy(t,sw));
   fprintf(f,"\n"); }
 
+// find all tstems in the sequence
+//
+// tstems are added as trna_loop structs to the hit array
+// the hit array is preallocated to some arbitrary size (3000 by default)
+//
+// modifies hit
+// returns the number of tstems found
+int find_tstems(
+  int *s,          // sequence
+  int ls,          // sequence length
+  trna_loop hit[], // array of trna_loops (currently all NULL)
+  int nh,          // hit length
+  csw *sw          // state - this is will not be modified
+) {
+  fprintf(stderr, "entering find_tstems: ls=%d, nh=%d, (sw->roffset)=%d\n", ls, nh, sw->roffset);
 
-
-int find_tstems(int *s, int ls, trna_loop hit[], int nh, csw *sw)
-{ int i,r,c,tstem,tloop,ithresh1;
+  int i,r,c,tstem,tloop,ithresh1;
   int *s1,*s2,*se,*ss,*si,*sb,*sc,*sf,*sl,*sx,*tem;
   double ec,energy,penalty,thresh2;
-  static double bem[6][6] =
-   { { -2.144,-0.428,-2.144, ATBOND, 0.000, 0.000 },
+  static double bem[6][6] ={
+     { -2.144,-0.428,-2.144, ATBOND, 0.000, 0.000 },
      { -0.428,-2.144, 3.000,-2.144, 0.000, 0.000 },
      { -2.144, 3.000,-2.144, 1.286, 0.000, 0.000 },
      {  ATBOND,-2.144, 1.286,-0.428, 0.000, 0.000 },
@@ -6339,8 +5329,8 @@ int find_tstems(int *s, int ls, trna_loop hit[], int nh, csw *sw)
   r = tem[*si++];
   r = (r >> 4) + tem[*si++];
   r = (r >> 4) + tem[*si++];
-  while (si < sl)
-   { r = (r >> 4) + tem[*si++];
+  while (si < sl) {
+     r = (r >> 4) + tem[*si++];
      if ((c = (r & 0xF)) < ithresh1) continue;
      sb = si - 7;
      sf = sb + 13;
@@ -6355,7 +5345,7 @@ int find_tstems(int *s, int ls, trna_loop hit[], int nh, csw *sw)
            else
             penalty = 3.0*(double)(12 - tloop - tstem);
            s1 = sb;
-        s2 = sc;
+           s2 = sc;
            se = s1 + tstem;
            energy = ec + bem[*se][se[4]] + bem[*s1++][*--s2] - penalty;
            while (s1  < se) energy += bem[*s1++][*--s2];
@@ -6377,12 +5367,8 @@ int find_tstems(int *s, int ls, trna_loop hit[], int nh, csw *sw)
   FN:
   return(i); }
 
-
-
-
-int find_astem5(int *si, int *sl, int *astem3, int n3,
-                trna_loop hit[], int nh, csw *sw)
-{ int i,k;
+int find_astem5(int *si, int *sl, int *astem3, int n3, trna_loop hit[], int nh, csw *sw){
+  int i,k;
   int *s1,*s2,*se;
   unsigned int r,tascanthresh;
   double tastemthresh,energy;
@@ -6434,8 +5420,6 @@ int find_astem5(int *si, int *sl, int *astem3, int n3,
   FN:
   return(i); }
 
-
-
 /*
 Resume consensus sequence is: WAUARNYGCNAANNANNA
 Williams, K. P., Martindale, K. A. & Bartel, D. P.  (1999)
@@ -6452,8 +5436,8 @@ H = A or C or T
 K = G or T
 */
 
-int find_resume_seq(int *s, int ls, trna_loop hit[], int nh, csw *sw)
-{ int e,i,j,k,a,aa[3],*si,*sb,*sf,*st,*sl;
+int find_resume_seq(int *s, int ls, trna_loop hit[], int nh, csw *sw){
+  int e,i,j,k,a,aa[3],*si,*sb,*sf,*st,*sl;
   double al;
   unsigned int r,c,thresh;
   static int nps[105] =
@@ -6561,16 +5545,13 @@ int find_resume_seq(int *s, int ls, trna_loop hit[], int nh, csw *sw)
   fprintf(stderr,"Too many resume sequence hits\n");
   goto FN; }
 
-
-int *base_copy3(int *from, int *to, int n)
-{ while (n-- > 0) *to++ = *from++;
+int *base_copy3(int *from, int *to, int n){
+  while (n-- > 0) *to++ = *from++;
   *to = TERM;
   return(to);  }
 
-
-
-void remove_intron(int *s1, int *s2, int nbase, int intron, int nintron)
-{ int *s1e;
+void remove_intron(int *s1, int *s2, int nbase, int intron, int nintron){
+  int *s1e;
   s1e = s1 + intron;
   nbase -= intron;
   while (s1 < s1e) *s2++ = *s1++;
@@ -6579,11 +5560,8 @@ void remove_intron(int *s1, int *s2, int nbase, int intron, int nintron)
   while (s1 < s1e) *s2++ = *s1++;
   *s2 = TERM; }
 
-
-
-
-gene *nearest_trna_gene(data_set *d, int nt, gene *t, csw *sw)
-{ int n,i,comp,mtrna,mtcompov,maxintronlen,ilength;
+gene *nearest_trna_gene(data_set *d, int nt, gene *t, csw *sw){
+  int n,i,comp,mtrna,mtcompov,maxintronlen,ilength;
   long a,b,c,e,score,thresh,psmax;
   static long proximity = 7*MINCTRNALEN/10;
   double energy;
@@ -6681,9 +5659,8 @@ gene *nearest_trna_gene(data_set *d, int nt, gene *t, csw *sw)
   if (n >= 0) return(ts + n);
   return(NULL); }
 
-
-gene *nearest_tmrna_gene(data_set *d, int nt, gene *t)
-{ int n,i,comp;
+gene *nearest_tmrna_gene(data_set *d, int nt, gene *t){
+  int n,i,comp;
   long a,b,c,e,score,smax,thresh,psmax;
   psmax = d->psmax;
   comp = t->comp;
@@ -6764,9 +5741,8 @@ gene *nearest_tmrna_gene(data_set *d, int nt, gene *t)
   if ((10*smax) > (9*thresh)) return(ts + n);
   return(NULL); }
 
-
-void overlap(data_set *d, int sort[], int n, int it, csw *sw)
-{ int i,j,flag,cross,crosstoo;
+void overlap(data_set *d, int sort[], int n, int it, csw *sw){
+  int i,j,flag,cross,crosstoo;
   long a,b,e,f,a2,b2,e2,f2,psmax;
   char sname[100],s[100];
   flag = 0;
@@ -6813,22 +5789,18 @@ void overlap(data_set *d, int sort[], int n, int it, csw *sw)
      location(s,ts+i,sw,sname);
      fprintf(sw->f,"Overlap with %d: %s\n", j+1,s);
      flag = 1; }
- if (flag) fputc('\n',sw->f); }
+  if (flag) fputc('\n',sw->f); }
 
-
-
-void init_gene(int nstart, int nstop)
-{ int i;
+void init_gene(int nstart, int nstop) {
+  int i;
   for (i = nstart; i < nstop; i++)
    { ts[i].energy = -1.0;
      ts[i].genetype = noGENE;
      ts[i].tps = 0;
      *(ts[i].name) = '\0'; }}
 
-
-
-gene *find_slot(data_set *d, gene *t, int *nts, csw *sw)
-{ int i,newspace;
+gene *find_slot(data_set *d, gene *t, int *nts, csw *sw){
+  int i,newspace;
   char s1[80],s2[80],s3[80],s4[80];
   gene *tn,*tsn;
   if (sw->comp)
@@ -6883,9 +5855,8 @@ gene *find_slot(data_set *d, gene *t, int *nts, csw *sw)
            fprintf(stderr,"\n"); }}
   return(tn); }
 
-
-int aatail(int *s, int *ext, csw *sw)
-{ int score,e;
+int aatail(int *s, int *ext, csw *sw){
+  int score,e;
   static int A[6] = { 1,0,0,0,0,0 };
   static int C[6] = { 0,1,0,0,0,0 };
   if (sw->aataildiv)
@@ -6919,16 +5890,8 @@ int aatail(int *s, int *ext, csw *sw)
      *ext = e;
      return(score); }}
 
-
-
-
-
-
-
-
-
-int find_mt_trna(data_set *d, int *seq, int lseq, int nts, csw *sw)
-{ int nah,ndh,nch,nth,ncdsh,h,i,j,k,n,p,y,av,gcc,cgcc,catc,athresh;
+int find_mt_trna(data_set *d, int *seq, int lseq, int nts, csw *sw) {
+  int nah,ndh,nch,nth,ncdsh,h,i,j,k,n,p,y,av,gcc,cgcc,catc,athresh;
   int igc,nbase,b8,b9,b48,b57,nc,na,nt,nti,nd,ndi,dposmap[32];
   int dl,tl,extastem,astem8,astem8d,ti,di,ser,tastem,tastem8,tastem8d;
   int astem,asteme,as,as8,aext,aext8,nbasefext,cloop,dloop,tloop,tc;
@@ -10001,13 +8964,11 @@ int find_mt_trna(data_set *d, int *seq, int lseq, int nts, csw *sw)
      }
   return(nts); }
 
-
-
 int tmopt(data_set *d,
           trna_loop *th, int tarm, double the,
           trna_loop *ahit, int nah,
-          int nts,int *seq, csw *sw)
-{ int r,na,nr,nrh,ibase,flag,as,aext,nbasefext;
+          int nts,int *seq, csw *sw){
+  int r,na,nr,nrh,ibase,flag,as,aext,nbasefext;
   int *s,*v,*s1,*s2,*sa,*sb,*se,*sf,*ps,*tpos,pseq[MAXETRNALEN+1];
   static int gtem[6] = { 0x00,0x00,0x11,0x00,0x00,0x00 };
   static double A[6] = { 6.0,0.0,0.0,0.0,0.0,0.0 };
@@ -10054,43 +9015,43 @@ int tmopt(data_set *d,
       { aenergy = ahit[na].energy;
         if (aenergy < athresh) continue;
         t.ps = ahit[na].pos;
- if (t.ps < (ps - MAXTPDIST)) continue;
- if (t.ps > (ps - MINTPDIST)) break;
- energy = -INACTIVE;
- sa = t.ps + t.astem1;
-        for (sb=sa+9, se=sb+t.cstem; sb <= (sa+16); sb++,se++)
-  for (sf = tpos-3; sf >= (tpos-7); sf--)
-   { s1 = sb;
-            s2 = sf;
-     e = bem[*s1++][*--s2];
-     while (s1 < se) e += bem[*s1++][*--s2];
-     if (e > energy)
-      { energy = e;
-        t.var = (int)(tpos - sf);
-        t.dloop = (int)(sb - sa); }}
-        if (energy < cthresh) continue;
-        energy += aenergy;
-        if (energy < cathresh) continue;
-        sb = sa + 3;
-        sf = sa + 7;
-        r = gtem[*sb++];
-        while (sb < sf)
-         { r = (r >> 4) + gtem[*sb++];
-           if ((r & 3) == 2)
-            { energy += 14.0;
-              break; }}
-        t.energy = penergy + Ga[t.ps[1]] + Ga[t.ps[2]] + energy;
-        if (t.energy > te.energy)
-         { flag = 1;
-    t.tstem = th->stem;
-    t.tloop = th->loop;
-           t.tps = (int)(ps - t.ps);
-           t.tpe = t.tps + rhit[nr].stem;
-    ibase = (int)(tpos - t.ps);
-           t.nintron = ibase - t.var - 2*t.cstem -
-                       t.dloop - t.astem1;
-           t.nbase = ibase + tarm + t.astem2 - t.nintron;
-           te = t; }}}
+  if (t.ps < (ps - MAXTPDIST)) continue;
+  if (t.ps > (ps - MINTPDIST)) break;
+  energy = -INACTIVE;
+  sa = t.ps + t.astem1;
+         for (sb=sa+9, se=sb+t.cstem; sb <= (sa+16); sb++,se++)
+   for (sf = tpos-3; sf >= (tpos-7); sf--)
+    { s1 = sb;
+             s2 = sf;
+      e = bem[*s1++][*--s2];
+      while (s1 < se) e += bem[*s1++][*--s2];
+      if (e > energy)
+       { energy = e;
+         t.var = (int)(tpos - sf);
+         t.dloop = (int)(sb - sa); }}
+         if (energy < cthresh) continue;
+         energy += aenergy;
+         if (energy < cathresh) continue;
+         sb = sa + 3;
+         sf = sa + 7;
+         r = gtem[*sb++];
+         while (sb < sf)
+          { r = (r >> 4) + gtem[*sb++];
+            if ((r & 3) == 2)
+             { energy += 14.0;
+               break; }}
+         t.energy = penergy + Ga[t.ps[1]] + Ga[t.ps[2]] + energy;
+         if (t.energy > te.energy)
+          { flag = 1;
+     t.tstem = th->stem;
+     t.tloop = th->loop;
+            t.tps = (int)(ps - t.ps);
+            t.tpe = t.tps + rhit[nr].stem;
+     ibase = (int)(tpos - t.ps);
+            t.nintron = ibase - t.var - 2*t.cstem -
+                        t.dloop - t.astem1;
+            t.nbase = ibase + tarm + t.astem2 - t.nintron;
+            te = t; }}}
   if (flag)
    { te.start = (long)(te.ps - seq);
      s = te.ps + te.nbase + te.nintron;
@@ -10109,12 +9070,11 @@ int tmopt(data_set *d,
        *tn = te; }}
   return(nts); }
 
-
 int tmopt_perm(data_set *d,
           trna_loop *th, int tarm, double the,
           trna_loop *ahit, int nah,
-          int nts, int *seq, csw *sw)
-{ int r,na,nr,nrh,flag,as,aext;
+          int nts, int *seq, csw *sw) {
+  int r,na,nr,nrh,flag,as,aext;
   int *s,*v,*s1,*s2,*sa,*sb,*se,*sf,*ps,*apos,*tpos;
   static int gtem[6] = { 0x00,0x00,0x11,0x00,0x00,0x00 };
   double e,energy,penergy,tenergy,aenergy,athresh,cthresh,cathresh;
@@ -10217,12 +9177,8 @@ int tmopt_perm(data_set *d,
      if (tn) *tn = te; }
   return(nts); }
 
-
-
-
-
-int ti_genedetected(data_set *d, int nts, int *seq, gene *te, csw *sw)
-{ int as,aext,as8,aext8,nbasefext,*s;
+int ti_genedetected(data_set *d, int nts, int *seq, gene *te, csw *sw) {
+  int as,aext,as8,aext8,nbasefext,*s;
   int pseq[2*MAXETRNALEN+1];
   gene *tn;
   te->nbase = te->astem1 + te->spacer1 + te->spacer2 + 2*te->dstem +
@@ -10259,9 +9215,13 @@ int ti_genedetected(data_set *d, int nts, int *seq, gene *te, csw *sw)
      *tn = *te; }
   return(nts); }
 
+void show_trna_loop(trna_loop x){ fprintf(stdout, "trna_loop[%d,%d,%f]\n", x.stem, x.loop, x.energy); }
 
-int tmioptimise(data_set *d, int *seq, int lseq, int nts, csw *sw)
-{ int i,j,k,intron,nt,nth,nd1,nd2,ndx,ndh,na,nah,nppah,nc,nch,tfold,tarm;
+int tmioptimise(data_set *d, int *seq, int lseq, int nts, csw *sw) {
+  fprintf(stderr, "fuck you bitches\n");
+  fprintf(stderr, "lseq=%d\n", lseq);
+
+  int i,j,k,intron,nt,nth,nd1,nd2,ndx,ndh,na,nah,nppah,nc,nch,tfold,tarm;
   int dstem,dloop,flag,mindist,maxdist,tmindist,tmaxdist,tmmindist,tmmaxdist;
   int tarmthresh,tmstrict,sp2min,sp2max,ige[7];
   int *se,*sc,*sb,*si,*tpos,*tend,*apos,*dpos,*tloopfold,*tmv,*cend;
@@ -10328,13 +9288,20 @@ int tmioptimise(data_set *d, int *seq, int lseq, int nts, csw *sw)
      {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 } };
   static trna_loop thit[NTH],chit[NC],ahit[NA];
   static trna_dloop dhit[ND];
+
   gene te;
+
   static gene t =
    { "",{TERM},{TERM},NULL,0,0,0L,0L,7,7,1,2,1,3,9,5,7,0,0,0,15,0,5,7,
      tRNA,0.0,0,0,0 };
+
   if (sw->mtrna)
-   { nts = find_mt_trna(d,seq,lseq,nts,sw);
-     if (!sw->tmrna) return(nts); }
+  {
+    // This is the monster 3000+ line function
+    nts = find_mt_trna(d,seq,lseq,nts,sw);
+    if (!sw->tmrna) return(nts);
+  }
+
   ethresh = sw->trnathresh;
   tmmindist = MINTPTSDIST + MINTPDIST;
   tmmaxdist = MAXTPTSDIST + MAXTPDIST;
@@ -10355,7 +9322,13 @@ int tmioptimise(data_set *d, int *seq, int lseq, int nts, csw *sw)
   tmstrict = sw->tmstrict;
   sp2min = sw->sp2min;
   sp2max = sw->sp2max;
+
+  // effect: updates thit
   nth = find_tstems(seq,lseq,thit,NTH,sw);
+
+  fprintf(stdout, "nth=%d\n", nth);
+  show_trna_loop(thit[nth]);
+
   nt = -1;
   while (++nt < nth)
    { tpos = thit[nt].pos;
@@ -10721,164 +9694,8 @@ int tmioptimise(data_set *d, int *seq, int lseq, int nts, csw *sw)
      if (flag) nts = ti_genedetected(d,nts,seq,&te,sw); }
   return(nts); }
 
-
-void disp_ftable_entry(FILE *f, int n[], int i, int m, csw *sw)
- { if (m > 0)
-    switch(sw->geneticcode)
-      { case METAZOAN_MT:
-          fprintf(f," %-18s %-4d",aa(n,sw),m);
-          break;
-        case STANDARD:
-        case VERTEBRATE_MT:
-        default:
-          fprintf(f," %-4s %-5d",aa(n,sw),m);
-          break; }
-   else
-    switch(sw->geneticcode)
-     { case METAZOAN_MT:
-         fprintf(f," %-18s     ",aa(n,sw));
-         break;
-      case STANDARD:
-      case VERTEBRATE_MT:
-      default:
-        fprintf(f," %-4s      ",aa(n,sw));
-        break; }}
-
-
-void disp_freq_table(int nt, csw *sw)
-{ int i,j,k,m,ambig,*s,c1,c2,c3,c[3],a[3],table[4][4][4];
-  static int cgflip[4] = { 0,2,1,3 };
-  static int codonorder[4] = { 3,1,0,2 };
-  FILE *f = sw->f;
-  ambig = 0;
-  for (i = 0; i < 4; i++)
-   for (j = 0; j < 4; j++)
-    for (k = 0; k < 4; k++)
-     table[i][j][k] = 0;
-  for (i = 0; i < nt; i++)
-   if (ts[i].energy >= 0.0)
-    if (ts[i].genetype == tRNA)
-     if (ts[i].cloop == 7)
-     { s = ts[i].seq + ts[i].anticodon;
-       c1 = *s;
-       c2 = s[1];
-       c3 = s[2];
-       if ((c1 >= Adenine) && (c1 <= Thymine))
-        if ((c2 >= Adenine) && (c2 <= Thymine))
-         if ((c3 >= Adenine) && (c3 <= Thymine))
-          table[*s][s[1]][s[2]]++;
-         else ambig++;
-        else ambig++;
-       else ambig++; }
-     else ambig++;
-  fprintf(f,"tRNA anticodon frequency\n");
-  for (i = 0; i < 4; i++)
-   { c[0] = codonorder[i];
-     a[2] = 3 - c[0];
-     for (j = 0; j < 4; j++)
-      { c[2] = codonorder[j];
-        a[0] = 3 - c[2];
-        for (k = 0; k < 4; k++)
-         { c[1] = codonorder[k];
-           a[1] = 3 - c[1];
-           fprintf(f,"%c%c%c",cpbase(a[0]),cpbase(a[1]),cpbase(a[2]));
-           m = table[a[0]][a[1]][a[2]];
-           disp_ftable_entry(f,a,k,m,sw); }
-        fputc('\n',f); }
-     if (i < 3) fputc('\n',f); }
-  if (ambig > 0) fprintf(f,"Ambiguous: %d\n",ambig);
-  fprintf(f,"\ntRNA codon frequency\n");
-  for (i = 0; i < 4; i++)
-   { c[0] = codonorder[i];
-     a[2] = 3 - c[0];
-     for (j = 0; j < 4; j++)
-      { c[2] = codonorder[j];
-        a[0] = 3 - c[2];
-        for (k = 0; k < 4; k++)
-         { c[1] = codonorder[k];
-           a[1] = 3 - c[1];
-           fprintf(f,"%c%c%c",cpbase(c[0]),cpbase(c[1]),cpbase(c[2]));
-           m = table[a[0]][a[1]][a[2]];
-           disp_ftable_entry(f,a,k,m,sw); }
-        fputc('\n',f); }
-     if (i < 3) fputc('\n',f); }
-  if (ambig > 0) fprintf(f,"Ambiguous: %d\n",ambig);
-  fputc('\n',f); }
-
-void disp_energy_stats(data_set *d, int nt, csw *sw)
-{ int i,n[NS],genetype,introns,nintron,trna,mtrna,ntv,nd,nps;
-  double gc,gcmin[NS],gcmax[NS];
-  FILE *f = sw->f;
-  mtrna = sw->mtrna;
-  trna = sw->trna | mtrna;
-  nps = 0;
-  if (mtrna)
-   { ntv = 0;
-     nd = 0; }
-  if ((sw->trna) && (sw->maxintronlen > 0))
-   { introns = 1;
-     nintron = 0; }
-  else
-   introns = 0;
-  for (i = 0; i < NS; i++)
-   { n[i] = 0;
-     gcmin[i] = 1.0;
-     gcmax[i] = 0.0; }
-  for (i = 0; i < nt; i++)
-   if (ts[i].energy >= 0.0)
-    { n[NS-1]++;
-      genetype = ts[i].genetype;
-      n[genetype]++;
-      if (pseudogene(ts + i,sw)) nps++;
-      if (genetype == tRNA)
-       { if (mtrna)
-          { if (ts[i].tstem == 0) ntv++;
-            if (ts[i].dstem == 0) nd++; }
-         if (introns) if (ts[i].nintron > 0) nintron++;
-         gc = gc_content(ts+i);
-         if (gc < gcmin[genetype]) gcmin[genetype] = gc;
-         if (gc > gcmax[genetype]) gcmax[genetype] = gc; }}
-  fputc('\n',f);
-  fputc('\n',f);
-  if (sw->repeatsn)
-   if ((n[tRNA] + n[tmRNA]) > 0)
-     fprintf(f,"%s\n\n",d->seqname);
-  if (trna)
-   { sw->ngene[tRNA] += n[tRNA];
-     if (n[tRNA] > 3) disp_freq_table(nt,sw);
-     if ((n[tRNA] > 1) || ((sw->tmrna) && (n[tmRNA] > 0)))
-      { if (introns)
-         { if (sw->minintronlen == 0)
-            fprintf(f,"Number of tRNA genes with no introns = %d\n",
-                    n[0]-nintron);
-           fprintf(f,"Number of tRNA genes with C-loop introns = %d\n",
-                   nintron); }
-        else
-         fprintf(f,"Number of %s genes = %d\n",sw->genetypename[tRNA],n[tRNA]);
-        if (mtrna)
-         { if (sw->tvloop)
-            fprintf(f,"Number of TV replacement loop tRNA genes = %d\n",
-             ntv);
-           fprintf(f,"Number of D replacement loop tRNA genes = %d\n",
-     nd); }
-  if (n[tRNA] > 1)
-   fprintf(f,"tRNA GC range = %2.1f%% to %2.1f%%\n",
-           gcmin[0]*100.0,gcmax[0]*100.0); }}
-  if (sw->tmrna)
-   { sw->ngene[tmRNA] += n[tmRNA];
-     if ((n[tmRNA] > 1) || (trna && (n[tRNA] > 0)))
-      fprintf(f,"Number of %s genes = %d\n",sw->genetypename[tmRNA],n[tmRNA]); }
-  sw->nps += nps;
-  if (sw->reportpseudogenes)
-   if (nps > 0)
-    if (n[NS-1] > 1)
-     fprintf(f,"Number of possible pseudogenes = %d\n",nps);
-  fputc('\n',f);
-  fputc('\n',f); }
-
-
-void batch_energy_stats(data_set *d, int nt, csw *sw)
-{ int i,n[NS],genetype,introns,nintron,trna,mtrna,ntv,nd,nps;
+void batch_energy_stats(data_set *d, int nt, csw *sw) {
+  int i,n[NS],genetype,introns,nintron,trna,mtrna,ntv,nd,nps;
   double gc,gcmin[NS],gcmax[NS];
   FILE *f = sw->f;
   mtrna = sw->mtrna;
@@ -10914,9 +9731,8 @@ void batch_energy_stats(data_set *d, int nt, csw *sw)
   if (sw->tmrna) sw->ngene[tmRNA] += n[tmRNA];
   sw->nps += nps; }
 
-
-int gene_sort(data_set *d, int nt, int sort[], csw *sw)
-{ int i,n,j,k;
+int gene_sort(data_set *d, int nt, int sort[], csw *sw) {
+  int i,n,j,k;
   long starti,startj,stopi,stopj,psmax;
   psmax = d->psmax;
   n = 0;
@@ -10953,546 +9769,8 @@ int gene_sort(data_set *d, int nt, int sort[], csw *sw)
              sort[j] = k; }}}
    return(n); }
 
-
-int iamatch(data_set *d, gene *t, csw *sw)
-{ char key[5],*k,s[100];
-  if (k = softstrpos(d->seqname,"TRNA-")) k += 5;
-  else
-   if (k = wildstrpos(d->seqname,"|***|")) k++;
-    else return(-1);
-  copy3cr(k,key,3);
-  name(t,s,1,sw);
-  if (softstrpos(s,key)) return(1);
-  return(0); }
-
-
-
-int gene_mismatch(data_set *d, annotated_gene *agene, gene *t, csw *sw)
-{
-int w,alen,dlen;
-char *s;
-w = 0;
-dlen = seqlen(t);
-alen = aseqlen(d,agene);
-switch(t->genetype)
- { case tRNA:
-     s = aa(t->seq + t->anticodon,sw);
-     if (!softstrpos(s,agene->species+5))
-      { if (t->cloop == 8)
-         { s = aa(t->seq + t->anticodon + 1,sw);
-           if (!softstrpos(s,agene->species+5)) w += 1; }
-        else if (t->cloop == 6)
-         { s = aa(t->seq + t->anticodon - 1,sw);
-           if (!softstrpos(s,agene->species+5)) w += 1; }
-        else w += 1; }
-     if (agene->comp != t->comp) w += 2;
-     if (alen <= (dlen - sw->trnalenmisthresh)) w += 4;
-     else if (alen >= (dlen + sw->trnalenmisthresh)) w += 4;
-     break;
-  case tmRNA:
-     if (agene->comp != t->comp) w += 2;
-     if (alen <= (dlen - sw->tmrnalenmisthresh)) w += 4;
-     else if (alen >= (dlen + sw->tmrnalenmisthresh)) w += 4;
-     break; }
-return(w);
-}
-
-
-int gene_mismatch_report(data_set *d, annotated_gene *agene, gene *t, char *report, csw *sw)
-{
-int w;
-char *s;
-w = gene_mismatch(d,agene,t,sw);
-s = report;
-if (w & 1) s = copy("amino acceptor",s);
-if (w & 2)
- { if (w & 1)
-    if (w & 4) s = copy(", ",s);
-    else s = copy(" and ",s);
-   s = copy("sense",s); }
-if (w & 4)
- { if ((w & 3) > 0) s = copy(" and ",s);
-   s = copy("sequence length",s); }
-if (w > 0) s = copy(" mismatch",s);
-*s = '\0';
-return(w);
-}
-
-
-
-int nearest_annotated_gene(data_set *d, gene *t,
-                           int list[], int score[], int nmax,
-                           csw *sw)
-{ int n,i,j,k,q,w,nagene;
-  long a,b,c,e,thresh,psmax;
-  char *s;
-  annotated_gene *ta;
-  psmax = d->psmax;
-  nagene = d->nagene[NS-1];
-  ta = d->gene;
-  n = 0;
-  a = t->start;
-  b = t->stop;
-  thresh = b-a;
-  if (b < a)
-   { b += psmax;
-     thresh += psmax;
-     for (i = 0; i < nagene; i++)
-      { c = ta[i].start;
-        e = ta[i].stop;
-        if (e < c)
-         { e += psmax;
-           if (a > e) goto NXTW;
-           if (b < c) goto NXTW;
-           if (n >= nmax) break;
-           list[n] = i;
-           score[n] = (a >= c)?((b >= e)?e-a:thresh):((b >= e)?e-c:b-c);
-           n++;
-           NXTW:
-           c -= psmax;
-           e -= psmax; }
-        if (a > e) continue;
-        if (b < c) continue;
-        if (n >= nmax) break;
-        list[n] = i;
-        score[n] = (a >= c)?((b >= e)?e-a:thresh):((b >= e)?e-c:b-c);
-        n++; }
-     a -= psmax;
-     b -= psmax; }
-  for (i = 0; i < nagene; i++)
-   { c = ta[i].start;
-     e = ta[i].stop;
-     if (e < c)
-      { e += psmax;
-        if (a > e) goto NXTN;
-        if (b < c) goto NXTN;
-        if (n >= nmax) break;
-        list[n] = i;
-        score[n] = (a >= c)?((b >= e)?e-a:thresh):((b >= e)?e-c:b-c);
-        n++;
-        NXTN:
-        c -= psmax;
-        e -= psmax; }
-     if (a > e) continue;
-     if (b < c) continue;
-     if (n >= nmax) break;
-     list[n] = i;
-     score[n] = (a >= c)?((b >= e)?e-a:thresh):((b >= e)?e-c:b-c);
-     n++; }
-  for (i = 0; i < n; i++)
-   { k = list[i];
-     if (ta[k].genetype == t->genetype)
-      { score[i] += 5000;
-        w = gene_mismatch(d,ta + k,t,sw);
-        if (w & 1) score[i] -= 2;
-        if (w & 2) score[i] -= 1; }}
-  if (n > 1)
-   { for (i = 0; i < (n-1); i++)
-      for (j = i+1; j < n; j++)
-       if (score[j] > score[i])
-       { k = list[i];
-         list[i] = list[j];
-         list[j] = k;
-         k = score[i];
-         score[i] = score[j];
-         score[j] = k; }}
-  return(n); }
-
-
-
-
-int proximity_compare(data_set *d, int is,
-                      long prox, long dlen, long alen,
-                      annotated_gene *a,
-                      csw *sw)
-{
-int w,score;
-long diff;
-char nm[200];
-gene *t;
-t = ts + is;
-w = gene_mismatch(d,a,t,sw);
-if (prox >= alen)
- { diff = dlen - alen;
-   if (prox >= (2L*diff)) score = (int)(prox - diff);
-   else score = (int)(prox/2L); }
-else
- if (prox >= dlen)
-  { diff = alen - dlen;
-    if (prox >= (2L*diff)) score = (int)(prox - diff);
-    else score = (int)(prox/2L); }
-else { score = (int)prox; }
-if (w & 1) score -= 10;
-if (w & 2) score -= 2;
-if (score < 0) score = 0;
-if (t->annotation >= 0)
- if (t->annosc >= score) return(-1);
-return(score);
-}
-
-
-
-
-int nearest_detected_gene(data_set *d, int sort[], int nd,
-                          int *scorep,
-                          annotated_gene *ag, csw *sw)
-{ int n,i,is;
-  long a,b,c,e,score,alen,scoremax,psmax;
-  long prox,proximity;
-  psmax = d->psmax;
-  n = -1;
-  scoremax = -1;
-  a = ag->start;
-  b = ag->stop;
-  alen = b - a;
-  if (b < a) alen += psmax;
-  proximity = 1 + alen/2;
-  if (proximity > 30) proximity = 30;
-  if (b < a)
-   { b += psmax;
-     for (i = 0; i < nd; i++)
-      { is = sort[i];
-        if (ag->genetype != ts[is].genetype) continue;
-        c = ts[is].start;
-        e = ts[is].stop;
-        if (e < c)
-         { e += psmax;
-           if (a > e) goto NXTW;
-           if (b < c) goto NXTW;
-           prox = (a >= c)?((b >= e)?e-a:alen):((b >= e)?e-c:b-c);
-           if (prox >= proximity)
-            if ((score = proximity_compare(d,is,prox,e-c,alen,ag,sw)) > scoremax)
-             { n = i;
-               scoremax = score; }
-           NXTW:
-           c -= psmax;
-           e -= psmax; }
-        if (a > e) continue;
-        if (b < c) continue;
-        prox = (a >= c)?((b >= e)?e-a:alen):((b >= e)?e-c:b-c);
-        if (prox >= proximity)
-         if ((score = proximity_compare(d,is,prox,e-c,alen,ag,sw)) > scoremax)
-          { n = i;
-            scoremax = score; }}
-     a -= psmax;
-     b -= psmax; }
-  for (i = 0; i < nd; i++)
-   { is = sort[i];
-     if (ag->genetype != ts[is].genetype) continue;
-     c = ts[is].start;
-     e = ts[is].stop;
-     if (e < c)
-      { e += psmax;
-        if (a > e) goto NXTN;
-        if (b < c) goto NXTN;
-        prox = (a >= c)?((b >= e)?e-a:alen):((b >= e)?e-c:b-c);
-        if (prox >= proximity)
-         if ((score = proximity_compare(d,is,prox,e-c,alen,ag,sw)) > scoremax)
-          { n = is;
-            scoremax = score; }
-        NXTN:
-        c -= psmax;
-        e -= psmax; }
-     if (a > e) continue;
-     if (b < c) continue;
-     prox = (a >= c)?((b >= e)?e-a:alen):((b >= e)?e-c:b-c);
-     if (prox >= proximity)
-      if ((score = proximity_compare(d,is,prox,e-c,alen,ag,sw)) > scoremax)
-       { n = is;
-         scoremax = score; }}
-  *scorep = scoremax;
-  return(n); }
-
-
-
-void disp_match(data_set *d, int *sort, int nd, csw *sw)
-{
-int i,ld,fn[NS],fp[NS],fpd,fptv,w,score,detect,n[NS];
-int prevannoted,nl,k,csort[NGFT],*msort;
-long start;
-char tag[52],nm[100],anm[100],ps[100],mreport[100],*s;
-FILE *f = sw->f;
-gene *t;
-annotated_gene *agene,*a;
-static char gp[2][7] = { "genes","gene" };
-static char comp[3] = " c";
-static char aps[2][5] = { "  ","PS" };
-nl = nd;
-if (sw->trna | sw->mtrna) nl += d->nagene[tRNA];
-if (sw->tmrna) nl += d->nagene[tmRNA];
-if (nl < NGFT) msort = csort;
-else
- { msort = (int *)malloc(nl*sizeof(int));
-   if (msort == NULL)
-    { fprintf(stderr,"Not enough memory to match genes\n");
-      return; }}
-fprintf(f,"\n%s\n",d->seqname);
-fprintf(f,"%ld nucleotides in sequence\n",d->psmax);
-fprintf(f,"Mean G+C content = %2.1f%%\n",100.0*d->gc);
-fprintf(f,"\nGenBank to Aragorn comparison\n\n");
-sw->dispmatch = 1;
-for (i = 0; i < NS; i++)
-  { n[i] = 0;
-    fn[i] = 0;
-    fp[i] = 0; }
-for (i = 0; i < nd; i++)
- { w = sort[i];
-   if (ts[w].energy >= 0.0)
-    { n[NS-1]++;
-     n[ts[w].genetype]++; }
-   ts[w].annotation = -1;
-   ts[w].annosc = -1; }
-if (sw->trna | sw->mtrna | sw->tmrna)
- { fpd = 0;
-   fptv = 0;
-   if (sw->trna | sw->mtrna)
-    { fprintf(f,"%d annotated tRNA %s\n",d->nagene[tRNA],gp[(d->nagene[tRNA]==1)?1:0]);
-      fprintf(f,"%d detected tRNA %s\n",n[tRNA],gp[(n[tRNA]==1)?1:0]); }
-   if (sw->tmrna)
-    { fprintf(f,"%d annotated tmRNA %s\n",d->nagene[tmRNA],gp[(d->nagene[tmRNA]==1)?1:0]);
-      fprintf(f,"%d detected tmRNA %s\n",n[tmRNA],gp[(n[tmRNA]==1)?1:0]); }
-   fprintf(f,"\n  GenBank                                      Aragorn\n");
-   nl = 0;
-   for (i = 0; i < d->nagene[NS-1]; i++)
-    { agene = d->gene + i;
-      agene->detected = -1;
-      if (agene->genetype != tRNA)
-       { if (agene->genetype != tmRNA) continue;
-         else if (!sw->tmrna) continue; }
-      else if (!sw->trna) if (!sw->mtrna) continue;
-      a = agene;
-      k = i;
-      while ((a->detected = nearest_detected_gene(d,sort,nd,&score,a,sw)) >= 0)
-       { t = ts + a->detected;
-         prevannoted = t->annotation;
-         t->annotation = k;
-         t->annosc = score;
-         if (prevannoted < 0) break;
-         if (prevannoted == k) break;
-         if (prevannoted == i) break;
-         a = d->gene + prevannoted;
-         k = prevannoted; }
-      k = nl;
-      while (--k >= 0)
-       { if (agene->start >= d->gene[msort[k]].start) break;
-         msort[k+1] = msort[k]; }
-      msort[++k] = i;
-      nl++; }
-   for (i = 0; i < nd; i++)
-    { t = ts + sort[i];
-      if (t->annotation >= 0) continue;
-      if (t->genetype != tRNA)
-       { if (t->genetype != tmRNA) continue;
-         else if (!sw->tmrna) continue; }
-      else if (!sw->trna) if (!sw->mtrna) continue;
-      k = nl;
-      while (--k >= 0)
-       { if (msort[k] >= 0) start = d->gene[msort[k]].start;
-         else start = ts[-1-msort[k]].start;
-         if (t->start >= start) break;
-         msort[k+1] = msort[k]; }
-      msort[++k] = -(sort[i] + 1);
-      nl++; }
-   for (i = 0; i < nl; i++)
-    { if (msort[i] >= 0)
-       { agene = d->gene + msort[i];
-         detect = agene->detected;
-         if (detect >= 0)
-          { t = ts + detect;
-            w = gene_mismatch_report(d,agene,t,mreport,sw);
-            if (w > 0) fputc('*',f);
-            else fputc(' ',f); }
-         else fputc('*',f);
-         sprintf(anm," %-11s%c(%ld,%ld) %s",
-                 agene->species,comp[agene->comp],
-                 sq(agene->start),sq(agene->stop),aps[agene->pseudogene]);
-         fprintf(f,"%-45s ",anm);
-         if (detect >= 0)
-          { fprintf(f,"%s ",name(t,nm,1,sw));
-            if (t->comp == 0) fputc(' ',f);
-            fprintf(f,"%s",position(ps,t,sw));
-            if (sw->energydisp) fprintf(f," %7.3lf",t->energy);
-            if (t->genetype == tmRNA)
-             { peptide_tag(tag,50,t,sw);
-               fprintf(f," %s",tag); }
-            if (sw->reportpseudogenes)
-             if (pseudogene(t,sw))
-              fprintf(f," PS");
-            if (w > 0) fprintf(f," %s",mreport);
-            fputc('\n',f); }
-         else
-          { fprintf(f,"Not detected\n");
-            fn[agene->genetype]++; }}
-      else
-       { t = ts - (msort[i] + 1);
-         fprintf(f,"* Not annotated                                %s ",name(t,nm,1,sw));
-         if (t->comp == 0) fputc(' ',f);
-         fprintf(f,"%s",position(ps,t,sw));
-         if (sw->energydisp) fprintf(f," %7.3lf",t->energy);
-         if (t->genetype == tmRNA)
-          { peptide_tag(tag,50,t,sw);
-            fprintf(f," %s",tag); }
-         if (sw->reportpseudogenes)
-          if (pseudogene(t,sw))
-           fprintf(f," PS");
-         fputc('\n',f);
-         fp[t->genetype]++;
-         if (t->genetype == tRNA)
-          { if (t->dstem == 0) fpd++;
-            if (t->tstem == 0) fptv++; }}}
-   fprintf(f,"\n");
-   if (sw->trna | sw->mtrna)
-    { fprintf(f,"Number of annotated tRNA genes not detected = %d\n",fn[tRNA]);
-      fprintf(f,"Number of unannotated tRNA genes detected = %d\n",fp[tRNA]); }
-   if (sw->mtrna)
-    { fprintf(f,"Number of unannotated D-replacement tRNA genes detected = %d\n",fpd);
-      fprintf(f,"Number of unannotated TV-replacement tRNA genes detected = %d\n",fptv); }
-   if (sw->tmrna)
-    { fprintf(f,"Number of annotated tmRNA genes not detected = %d\n",fn[tmRNA]);
-      fprintf(f,"Number of unannotated tmRNA genes detected = %d\n",fp[tmRNA]); }
-   fprintf(f,"\n\n");
-   for (i = tRNA; i <= tmRNA; i++)
-    { sw->nagene[i] += d->nagene[i];
-      sw->nafn[i] += fn[i];
-      sw->nafp[i] += fp[i]; }
-   if (sw->mtrna)
-    { sw->natfpd += fpd;
-      sw->natfptv += fptv; }}
-sw->nabase += d->psmax;
-sw->dispmatch = 0;
-if (nl >= NGFT) free((void *)msort);
-}
-
-
-void annotation_overlap_check(data_set *d, gene *t, char *margin, csw *sw)
-{
-int a,m,n,w,list[20],score[20];
-char mreport[100];
-static char comp[3] = " c";
-n = nearest_annotated_gene(d,t,list,score,20,sw);
-if (n < 1) m = -1;
-else
- { m = 0;
-   a = list[m];
-   if (d->gene[a].genetype != t->genetype) m = -1;
-   else
-    { w = gene_mismatch_report(d,d->gene+a,t,mreport,sw);
-      if (w & 1)
-       { if ((score[m] - 5000) < (3*seqlen(t)/4)) m = -1; }
-      else
-       { if ((score[m] - 5000) < (seqlen(t)/3)) m = -1; }}}
-if (m < 0)
- fprintf(sw->f,"%sNot annotated\n",margin);
-else
- { a = list[m];
-   fprintf(sw->f,"%sMatch with annotated %s %c(%ld,%ld)",
-           margin,d->gene[a].species,comp[d->gene[a].comp],
-           d->gene[a].start,d->gene[a].stop);
-   w = gene_mismatch_report(d,d->gene+a,t,mreport,sw);
-   if (w > 0) fprintf(sw->f," * %s",mreport);
-   fputc('\n',sw->f); }
-while (++m < n)
- { a = list[m];
-   fprintf(sw->f,"%sOverlap with annotated %s %c(%ld,%ld)\n",
-           margin,d->gene[a].species,comp[d->gene[a].comp],
-           d->gene[a].start,d->gene[a].stop); }
-fputc('\n',sw->f);
-}
-
-void disp_gene_set(data_set *d, int nt, csw *sw)
-{ int i,j,n,vsort[NT],*sort;
-  char m[MATX][MATY],s[20];
-  gene *t;
-  FILE *f = sw->f;
-  if (nt <= NT)
-   sort = vsort;
-  else
-   { sort = (int *)malloc(nt*sizeof(int));
-     if (sort == NULL)
-      { fprintf(stderr,"Not enough memory to sort genes\n");
-        exit(1); }}
-  n = gene_sort(d,nt,sort,sw);
-  j = sw->tmrna_struct[54];
-  for (i = 55; i <= 60; i++) j += sw->tmrna_struct[i];
-  if (j != ((sw->tmrna_struct[0] << 4) + 9)) return;
-  if (sw->libflag < 2)
-   { if (n > 0)
-      for (j = 0; j < n;)
-       { i = sort[j++];
-         t = ts + i;
-         t->energy = nenergy(t,sw);
-         switch(t->genetype)
-          { case tRNA:
-                    init_matrix(m);
-                    disp_gene(t,m,sw);
-                    sprintf(s,"%d.",j);
-                    xcopy(m,0,32,s,length(s));
-                    disp_matrix(f,m,MATY);
-                    if (sw->matchacceptor)
-                     if (iamatch(d,t,sw) == 0)
-                      { fprintf(f,"    Iso-acceptor mismatch\n");
-                        sw->iamismatch++; }
-                    if (sw->annotated)
-                     annotation_overlap_check(d,t,"    ",sw);
-                    overlap(d,sort,n,i,sw);
-                    if (sw->secstructdisp & 2) disp_trna_bracket_notation(f,t,sw);
-                    if (sw->secstructdisp & 4) disp_gene_SVG(t,m,sw);
-                    if (sw->seqdisp) disp_seq(f,t,sw);
-                    if (t->nintron > 0) disp_intron(f,t,sw);
-                    if (sw->energydisp > 1) trna_score(f,t);
-                    break;
-            case tmRNA:
-                    if ((sw->secstructdisp & 1) || (sw->secstructdisp & 4))
-                     { init_matrix(m);
-                       disp_gene(t,m,sw); }
-                    if (sw->secstructdisp & 1)
-                     { sprintf(s,"%d.",j);
-                       xcopy(m,0,32,s,length(s));
-                       disp_matrix(f,m,MATY);
-                       if (sw->annotated)
-                        annotation_overlap_check(d,t,"    ",sw); }
-                    else
-                     { fprintf(f,"\n%d.\n",j);
-                       disp_location(t,sw,"Location");
-                       if (sw->reportpseudogenes)
-                        if (pseudogene(t,sw))
-                         fprintf(f,"Possible Pseudogene\n");
-                       if (sw->energydisp)
-                        fprintf(f,"Score = %g\n",t->energy);
-                       if (sw->annotated)
-                        annotation_overlap_check(d,t,"",sw); }
-                    overlap(d,sort,n,i,sw);
-                    if (t->asst == 0) disp_tmrna_seq(f,t,sw);
-                    else disp_tmrna_perm_seq(f,t,sw);
-                    if (sw->secstructdisp & 4) disp_gene_SVG(t,m,sw);
-                    if (sw->energydisp > 1) tmrna_score(f,t,sw);
-                    break;
-            case CDS:
-                    fprintf(f,"\n%d.\nCDS gene\n",j);
-                    disp_location(t,sw,"Location");
-                    if (sw->annotated)
-                     annotation_overlap_check(d,t,"",sw);
-                    overlap(d,sort,n,i,sw);
-                    disp_cds(f,t,sw);
-                    break;
-                  }
-         if (sw->libflag > 0) write_to_library(f,t,sw); }
-     else
-      if (*(d->seqname) != '\0')
-       fprintf(f,"\nNothing found in %s\n\n\n",d->seqname);
-      else
-       fprintf(f,"\nNothing found\n\n\n"); }
-  else
-   { if (n > 0)
-      for (i = 0; i < n; i++)
-       write_to_library(f,ts + sort[i],sw); }
-  disp_energy_stats(d,nt,sw);
-  if (d->datatype == GENBANK) disp_match(d,sort,n,sw);
-  if (nt > NT) free((void *)sort); }
-
-
-void batch_gene_set(data_set *d, int nt, csw *sw)
-{ int i,j,n,vsort[NT],nspaces,caps,*sort;
+void batch_gene_set(data_set *d, int nt, csw *sw) {
+  int i,j,n,vsort[NT],nspaces,caps,*sort;
   gene *t;
   FILE *f = sw->f;
   if (nt <= NT)
@@ -11539,9 +9817,8 @@ void batch_gene_set(data_set *d, int nt, csw *sw)
   batch_energy_stats(d,nt,sw);
   if (nt > NT) free((void *)sort); }
 
-
-void remove_overlapping_trna(data_set *d, int nt, csw *sw)
-{ int i,n,ioverlay;
+void remove_overlapping_trna(data_set *d, int nt, csw *sw){
+  int i,n,ioverlay;
   long a,b,c,e,len,leni,overlap,psmax;
   char s1[80],s2[80];
   gene *t,*ti;
@@ -11615,318 +9892,8 @@ void remove_overlapping_trna(data_set *d, int nt, csw *sw)
                fprintf(stderr,"\n"); }
             ti->energy = -1.0; }}}}
 
-
-
-void iopt_fastafile(data_set *d, csw *sw)
-{ int i,nt,flag,len,aragorn,anticodon;
-  int *s,*sf,*se,*sc,*swrap;
-  int seq[2*LSEQ+WRAP+1],cseq[2*LSEQ+WRAP+1],wseq[2*WRAP+1];
-  long gap,start,rewind,drewind,psmax,tmaxlen,vstart,vstop;
-  double sens,sel1,sel2;
-  char c1,c2,c3;
-  static char trnatypename[3][25] =
-   { "Metazoan mitochondrial","Cytosolic","Mammalian mitochondrial" };
-  static char genecodename[NGENECODE][50] =
-   { "composite Metazoan mitochondrial",
-     "standard",
-     "vertebrate mitochondrial",
-     "yeast mitochondrial",
-     "mold/protozoan/Coelenterate mitochondrial",
-     "invertebrate mitochondrial",
-     "Ciliate",
-     "deleted -> standard",
-     "deleted -> standard",
-     "Echinoderm/Flatworm mitochondrial",
-     "Euplotid",
-     "bacterial/plant chloroplast",
-     "alternative yeast",
-     "Ascidian mitochondrial",
-     "alternative flatworm mitochondrial",
-     "Blepharisma",
-     "Chlorophycean mitochondrial",
-     "deleted -> standard",
-     "deleted -> standard",
-     "deleted -> standard",
-     "deleted -> standard",
-     "Trematode mitochondrial",
-     "Scenedesmus obliquus mitochondrial",
-     "Thraustochytrium mitochondrial",
-     "Pterobranchia mitochondrial",
-     "Gracilibacteria",
-     "Pachysolen tannophilus",
-     "Karyorelict",
-     "Condylostoma",
-     "Mesodinium",
-     "Peritrich",
-     "Blastocrithidia",
-     "vacant -> standard",
-     "Cephalodiscidae mitochondrial UAA-Tyr"
-   };
-  FILE *f = sw->f;
-  init_tmrna(f,sw);
-  aragorn = (sw->trna || sw->tmrna || sw->cds || sw->srprna);
-  fprintf(f,"\nPlease reference the following paper");
-  if (aragorn && sw->mtrna) fputc('s',f);
-  fprintf(f," if you use this\n");
-  fprintf(f,"program as part of any published research.\n\n");
-  if (aragorn)
-   { fprintf(f,"Laslett, D. and Canback, B. (2004) ARAGORN, a\n");
-     fprintf(f,"program for the detection of transfer RNA and\n");
-     fprintf(f,"transfer-messenger RNA genes in nucleotide sequences.\n");
-     fprintf(f,"Nucleic Acids Research, 32;11-16.\n\n"); }
-  if (sw->mtrna)
-   { fprintf(f,"Laslett, D. and Canback, B. (2008) ARWEN: a\n");
-     fprintf(f,"program to detect tRNA genes in metazoan mitochondrial\n");
-     fprintf(f,"nucleotide sequences\n");
-     fprintf(f,"Bioinformatics, 24(2); 172-175.\n\n\n"); }
-  fputc('\n',f);
-  if (sw->mtrna)
-   { fprintf(f,"Searching for %s tRNA genes\n",trnatypename[sw->discrim]);
-     if (!sw->tvloop)
-      fprintf(f,"TV replacement loop tRNA genes not detected\n"); }
-  else
-   if (sw->trna)
-    { fprintf(f,"Searching for tRNA genes");
-      if (sw->maxintronlen > 0) fprintf(f," with introns in anticodon loop");
-      else fprintf(f," with no introns");
-      fputc('\n',f);
-      if (sw->maxintronlen > 0)
-       { fprintf(f,"Intron length from %d to %d bases\n",
-               sw->minintronlen,sw->maxintronlen);
-         if (sw->ifixedpos)
-          { fprintf(f,"Intron position fixed between positions 37 and 38\n");
-            fprintf(f,"on C-loop (one base after anticodon)\n"); }
-         if (sw->ioverlay)
-          fprintf(f,"Allowing overlay of long tRNA genes\n"); }}
-  if (sw->tmrna)
-    fprintf(f,"Searching for tmRNA genes\n");
-  if (sw->linear)
-   fprintf(f,"Assuming linear topology, search will not wrap around ends\n");
-  else
-   fprintf(f,"Assuming circular topology, search wraps around ends\n");
-  if (sw->both == 2)
-   fprintf(f,"Searching both strands\n");
-  else
-   if (sw->both == 1)
-    fprintf(f,"Searching complementary (antisense) strand only\n");
-   else
-    fprintf(f,"Searching single (sense) strand only\n");
-  if (sw->mtrna)
-   if (sw->mtcompov)
-    fprintf(f,"Reporting overlapping candidates on opposite strands\n");
-  if ((sw->mtrna) || (sw->trna) || (sw->tmrna))
-   { fprintf(f,"Using %s genetic code\n",genecodename[sw->geneticcode]);
-     if (sw->ngcmod > 0)
-      { fprintf(f,"Specified modifications:\n");
-        for (i = 0; i < sw->ngcmod; i++)
-         { anticodon = sw->gcmod[i];
-           c1 = cpbase(Thymine - (anticodon & 0x3));
-           c2 = cpbase(Thymine - ((anticodon >> 2) & 0x3));
-           c3 = cpbase(Thymine - ((anticodon >> 4) & 0x3));
-           fprintf(f,"%c%c%c = %s\n",c1,c2,c3,
-                   aaname[aamap[sw->geneticcode][anticodon]]); }}}
-  fputc('\n',f);
-  fputc('\n',f);
-  rewind = MAXTAGDIST + 20;
-  if (sw->trna | sw->mtrna)
-   { tmaxlen = MAXTRNALEN + sw->maxintronlen;
-     if (rewind < tmaxlen) rewind = tmaxlen; }
-  if (sw->tmrna)
-   if (rewind < MAXTMRNALEN) rewind = MAXTMRNALEN;
-  if (sw->peptide)
-   if (sw->tagthresh >= 5)
-    if (rewind < TSWEEP) rewind = TSWEEP;
-  sw->loffset = rewind;
-  sw->roffset = rewind;
-  drewind = 2*rewind;
-  d->ns = 0;
-  d->nf = 0;
-  d->nextseq = 0L;
-  d->nextseqoff = 0L;
-  while (d->nextseq >= 0L)
-   { d->seqstart = d->nextseq;
-     d->seqstartoff = d->nextseqoff;
-     if (!seq_init(d,sw)) break;
-     psmax = d->psmax;
-     if (sw->verbose)
-      { fprintf(stderr,"%s\n",d->seqname);
-        fprintf(stderr,"%ld nucleotides in sequence\n",psmax);
-        fprintf(stderr,"Mean G+C content = %2.1f%%\n",100.0*d->gc);
-        if ((sw->mtrna) || (sw->trna) || (sw->tmrna))
-         { fprintf(stderr,"Using %s genetic code\n",genecodename[sw->geneticcode]);
-           if (sw->ngcmod > 0)
-            { fprintf(stderr,"Specified modifications:\n");
-              for (i = 0; i < sw->ngcmod; i++)
-               { anticodon = sw->gcmod[i];
-                 c1 = cpbase(Thymine - (anticodon & 0x3));
-                 c2 = cpbase(Thymine - ((anticodon >> 2) & 0x3));
-                 c3 = cpbase(Thymine - ((anticodon >> 4) & 0x3));
-                 fprintf(stderr,"%c%c%c = %s\n",c1,c2,c3,
-                         aaname[aamap[sw->geneticcode][anticodon]]); }}}}
-     fprintf(f,"%s\n",d->seqname);
-     fprintf(f,"%ld nucleotides in sequence\n",psmax);
-     fprintf(f,"Mean G+C content = %2.1f%%\n",100.0*d->gc);
-     init_gene(0,NT);
-     nt = 0;
-     flag = 0;
-     start = 1L;
-     se = seq;
-     if (sw->linear)
-      { for (i = 0; i < rewind; i++) *se++ = NOBASE;
-        start -= rewind; }
-     else
-      { if (psmax <= drewind)
-         { gap = drewind - psmax;
-           sc = se + gap;
-           while (se < sc) *se++ = NOBASE;
-           swrap = wseq;
-           sc = se + psmax;
-           while (se < sc)
-            { *se = move_forward(d);
-              *swrap++ = *se++; }
-           sc = swrap + gap;
-           while (swrap < sc) *swrap++ = NOBASE;
-                   swrap = wseq;
-                   sc = swrap + psmax;
-                   while (swrap < sc) *se++ = *swrap++;
-                   swrap = wseq;
-                   sc = swrap + drewind;
-                   while (swrap < sc) *se++ = *swrap++;
-                   sw->loffset = drewind;
-                   sw->roffset = drewind;
-                   start -= drewind;
-                   flag = 1;
-                   goto SH; }
-        else
-         { swrap = wseq;
-           sc = seq + drewind;
-           while (se < sc)
-            { *se = move_forward(d);
-              *swrap++ = *se++; }}}
-     sc = seq + LSEQ;
-     NX:
-     while (se < sc)
-      { if (d->ps >= psmax)
-         { if (sw->linear)
-            for (i = 0; i < rewind; i++) *se++ = NOBASE;
-           else
-            { sc = wseq + drewind;
-              swrap = wseq;
-              while (swrap < sc) *se++ = *swrap++; }
-           flag = 1;
-           break; }
-        else *se++ = move_forward(d); }
-     SH:
-     len = (int)(se - seq);
-     if (sw->verbose)
-      { vstart = sq(start + sw->loffset);
-        vstop = sq(start + len - sw->roffset - 1);
-        if (vstop < vstart)
-         { fprintf(stderr,"Searching from %ld to %ld\n",vstart,psmax);
-           fprintf(stderr,"Searching from 1 to %ld\n",vstop); }
-        else
-         fprintf(stderr,"Searching from %ld to %ld\n",vstart,vstop); }
-     if (sw->both != 1)
-      { sw->start = start;
-        sw->comp = 0;
-        nt = tmioptimise(d,seq,len,nt,sw); }
-     if (sw->both > 0)
-      { sense_switch(seq,cseq,len);
-        sw->start = start+len;
-        sw->comp = 1;
-        nt = tmioptimise(d,cseq,len,nt,sw); }
-     if (!flag)
-      { s = seq;
-        sf = se - drewind;
-        se = seq + drewind;
-        while (s < se) *s++ = *sf++;
-        start += len - drewind;
-        goto NX; }
-     if (nt < 1) d->nf++;
-     if (sw->maxintronlen > 0) remove_overlapping_trna(d,nt,sw);
-     if (sw->updatetmrnatags) update_tmrna_tag_database(ts,nt,sw);
-     disp_gene_set(d,nt,sw);
-     if (sw->verbose) fprintf(stderr,"%s\nSearch Finished\n\n",d->seqname);
-     d->ns++; }
-  if (d->ns > 1)
-   { fprintf(f,"\n\n%d sequences searched\n",d->ns);
-     if (sw->trna | sw->mtrna)
-      { fprintf(f,"Total tRNA genes = %d\n",sw->ngene[tRNA]);
-        if (sw->matchacceptor)
-         fprintf(f,"Total iso-acceptor mismatches = %d\n",sw->iamismatch); }
-     if (sw->tmrna) fprintf(f,"Total tmRNA genes = %d\n",sw->ngene[tmRNA]);
-     if (sw->reportpseudogenes)
-      if (sw->nps > 0)
-       fprintf(f,"Total number of possible pseudogenes = %d\n",sw->nps);
-     if (d->nf > 0)
-      { sens = 100.0*(d->ns - d->nf)/d->ns;
-        fprintf(f,"Nothing found in %d sequences (%.2lf%% sensitivity)\n",d->nf,sens); }
-     if (sw->annotated)
-      { if (sw->trna | sw->mtrna)
-         { fprintf(f,"\nTotal number of annotated tRNA genes = %d\n",
-                   sw->nagene[tRNA]);
-           fprintf(f,"Total number of annotated tRNA genes not detected = %d\n",sw->nafn[tRNA]);
-           fprintf(f,"Total number of unannotated tRNA genes detected = %d\n",sw->nafp[tRNA]);
-           fprintf(f,"Total number of unannotated DRL tRNA genes detected = %d\n",
-                   sw->natfpd);
-           fprintf(f,"Total number of unannotated TVRL tRNA genes detected = %d\n",
-                   sw->natfptv);
-           fprintf(f,"Total annotated sequence length = %ld bases\n",sw->nabase);
-           sens = (sw->nagene[tRNA] > 0)?
-                         100.0*(double)(sw->nagene[tRNA] - sw->nafn[tRNA])/
-                         (double)sw->nagene[tRNA]:0.0;
-           sel1 = (sw->nagene[tRNA] > 0)?
-                         100.0*(double)(sw->nafp[tRNA])/
-                         (double)sw->nagene[tRNA]:0.0;
-           sel2 = (sw->nabase > 0)?
-                         1000000.0*(double)(sw->nafp[tRNA])/
-                         (double)sw->nabase:0.0;
-           fprintf(f,"Sensitivity = %lg%%\n",sens);
-           fprintf(f,"Selectivity = %lg%% or %lg per megabase\n\n",sel1,sel2); }
-        if (sw->tmrna)
-         { fprintf(f,"\nTotal number of annotated tmRNA genes = %d\n",
-                   sw->nagene[tmRNA]);
-           fprintf(f,"Total number of annotated tmRNA genes not detected = %d\n",sw->nafn[tmRNA]);
-           fprintf(f,"Total number of unannotated tmRNA genes detected = %d\n",sw->nafp[tmRNA]);
-           fprintf(f,"Total annotated sequence length = %ld bases\n",sw->nabase);
-           sens = (sw->nagene[tmRNA] > 0)?
-                         100.0*(double)(sw->nagene[tmRNA] - sw->nafn[tmRNA])/
-                         (double)sw->nagene[tmRNA]:0.0;
-           sel1 = (sw->nagene[tmRNA] > 0)?
-                         100.0*(double)(sw->nafp[tmRNA])/
-                         (double)sw->nagene[tmRNA]:0.0;
-           sel2 = (sw->nabase > 0)?
-                         1000000.0*(double)(sw->nafp[tmRNA])/
-                         (double)sw->nabase:0.0;
-           fprintf(f,"Sensitivity = %lg%%\n",sens);
-           fprintf(f,"Selectivity = %lg%% or %lg per Megabase\n\n",sel1,sel2); }
-        if (sw->cds)
-         { fprintf(f,"\nTotal number of annotated CDS genes = %d\n",
-                   sw->nagene[CDS]);
-           fprintf(f,"Total number of annotated CDS genes not detected = %d\n",sw->nafn[CDS]);
-           fprintf(f,"Total number of unannotated CDS genes detected = %d\n",sw->nafp[CDS]);
-           fprintf(f,"Total annotated sequence length = %ld bases\n",sw->nabase);
-           sens = (sw->nagene[CDS] > 0)?
-                         100.0*(double)(sw->nagene[CDS] - sw->nafn[CDS])/
-                         (double)sw->nagene[CDS]:0.0;
-           sel1 = (sw->nagene[CDS] > 0)?
-                         100.0*(double)(sw->nafp[CDS])/
-                         (double)sw->nagene[CDS]:0.0;
-           sel2 = (sw->nabase > 0)?
-                         1000000.0*(double)(sw->nafp[CDS])/
-                         (double)sw->nabase:0.0;
-           fprintf(f,"Sensitivity = %lg%%\n",sens);
-           fprintf(f,"Selectivity = %lg%% or %lg per Megabase\n",sel1,sel2);
-           sens = (sw->lacds > 0)?
-                         100.0*(double)sw->ldcds/(double)sw->lacds:0.0;
-           fprintf(f,"Length sensitivity = %lg%%\n\n",sens); }
-      } }
-  if (sw->updatetmrnatags) report_new_tmrna_tags(sw);
-}
-
-
-void bopt_fastafile(data_set *d, csw *sw)
-{ int i,nt,flag,len;
+void bopt_fastafile(data_set *d, csw *sw){
+  int i,nt,flag,len;
   int *s,*sf,*se,*sc,*swrap;
   int seq[2*LSEQ+WRAP+1],cseq[2*LSEQ+WRAP+1],wseq[2*WRAP+1];
   long gap,start,rewind,drewind,psmax,tmaxlen,vstart,vstop;
@@ -11948,17 +9915,16 @@ void bopt_fastafile(data_set *d, csw *sw)
   d->nf = 0;
   d->nextseq = 0L;
   d->nextseqoff = 0L;
+
   while (d->nextseq >= 0L)
-   { d->seqstart = d->nextseq;
+   {
+     d->seqstart = d->nextseq;
      d->seqstartoff = d->nextseqoff;
      if (!seq_init(d,sw)) break;
      psmax = d->psmax;
-     if (sw->verbose)
-      { fprintf(stderr,"%s\n",d->seqname);
-        fprintf(stderr,"%ld nucleotides in sequence\n",psmax);
-        fprintf(stderr,"Mean G+C content = %2.1f%%\n",100.0*d->gc); }
-     if (sw->batch < 2) fprintf(f,">%s\n",d->seqname);
+
      init_gene(0,NT);
+
      nt = 0;
      flag = 0;
      start = 1L;
@@ -11967,28 +9933,31 @@ void bopt_fastafile(data_set *d, csw *sw)
       { for (i = 0; i < rewind; i++) *se++ = NOBASE;
         start -= rewind; }
      else
-      { if (psmax <= drewind)
-         { gap = drewind - psmax;
+      { if (psmax <= drewind) {
+           gap = drewind - psmax;
            sc = se + gap;
            while (se < sc) *se++ = NOBASE;
            swrap = wseq;
            sc = se + psmax;
            while (se < sc)
-            { *se = move_forward(d);
-              *swrap++ = *se++; }
+            {
+              // read the next character from the file
+              *se = move_forward(d);
+              *swrap++ = *se++;
+            }
            sc = swrap + gap;
            while (swrap < sc) *swrap++ = NOBASE;
-                   swrap = wseq;
-                   sc = swrap + psmax;
-                   while (swrap < sc) *se++ = *swrap++;
-                   swrap = wseq;
-                   sc = swrap + drewind;
-                   while (swrap < sc) *se++ = *swrap++;
-                   sw->loffset = drewind;
-                   sw->roffset = drewind;
-                   start -= drewind;
-                   flag = 1;
-                   goto SH; }
+           swrap = wseq;
+           sc = swrap + psmax;
+           while (swrap < sc) *se++ = *swrap++;
+           swrap = wseq;
+           sc = swrap + drewind;
+           while (swrap < sc) *se++ = *swrap++;
+           sw->loffset = drewind;
+           sw->roffset = drewind;
+           start -= drewind;
+           flag = 1;
+           goto SH; }
         else
          { swrap = wseq;
            sc = seq + drewind;
@@ -11996,7 +9965,9 @@ void bopt_fastafile(data_set *d, csw *sw)
             { *se = move_forward(d);
               *swrap++ = *se++; }}}
      sc = seq + LSEQ;
+
      NX:
+
      while (se < sc)
       { *se++ = move_forward(d);
         if (d->ps >= psmax)
@@ -12008,25 +9979,15 @@ void bopt_fastafile(data_set *d, csw *sw)
               while (swrap < sc) *se++ = *swrap++; }
            flag = 1;
            break; }}
-         SH:
+
+     SH:
      len = (int)(se - seq);
-     if (sw->verbose)
-      { vstart = sq(start + sw->loffset);
-        vstop = sq(start + len - sw->roffset - 1);
-        if (vstop < vstart)
-         { fprintf(stderr,"Searching from %ld to %ld\n",vstart,psmax);
-           fprintf(stderr,"Searching from 1 to %ld\n",vstop); }
-        else
-         fprintf(stderr,"Searching from %ld to %ld\n",vstart,vstop); }
-     if (sw->both != 1)
-      { sw->start = start;
-        sw->comp = 0;
-        nt = tmioptimise(d,seq,len,nt,sw); }
-     if (sw->both > 0)
-      { sense_switch(seq,cseq,len);
-        sw->start = start+len;
-        sw->comp = 1;
-        nt = tmioptimise(d,cseq,len,nt,sw); }
+     sw->start = start;
+     sw->comp = 0;
+
+     // seq stores the DNA sequence encoded as 0-3
+     nt = tmioptimise(d,seq,len,nt,sw);
+
      if (!flag)
       { s = seq;
         sf = se - drewind;
@@ -12034,136 +9995,17 @@ void bopt_fastafile(data_set *d, csw *sw)
         while (s < se) *s++ = *sf++;
         start += len - drewind;
         goto NX; }
+
      if (nt < 1) d->nf++;
      if (sw->maxintronlen > 0) remove_overlapping_trna(d,nt,sw);
      if (sw->updatetmrnatags) update_tmrna_tag_database(ts,nt,sw);
      batch_gene_set(d,nt,sw);
-     if (sw->verbose) fprintf(stderr,"%s\nSearch Finished\n\n",d->seqname);
-     d->ns++; }
-  if ((d->ns > 1) && (sw->batch < 2))
-   { fprintf(f,">end \t%d sequences",d->ns);
-     if (sw->trna || sw->mtrna) fprintf(f," %d tRNA genes",sw->ngene[tRNA]);
-     if (sw->tmrna) fprintf(f," %d tmRNA genes",sw->ngene[tmRNA]);
-     if (d->nf > 0)
-      { sens = 100.0*(d->ns - d->nf)/d->ns;
-        fprintf(f,", nothing found in %d sequences, (%.2lf%% sensitivity)",d->nf,sens); }
-     fputc('\n',f); }
-  if (sw->updatetmrnatags) report_new_tmrna_tags(sw);
-}
+     d->ns++;
+   }
 
+  if (sw->updatetmrnatags) report_new_tmrna_tags(sw); }
 
-void aragorn_help_menu()
-{
-int h;
-for (h = 0; h < NHELPLINE; h++) printf("%s\n",helpmenu[h]);
-}
-
-void error_report(int n, char *s)
-{ switch(n)
-   { case 0: fprintf(stderr,
-              "-%s not recognised, type aragorn -h for help\n",s);
-             break;
-     case 1: fprintf(stderr,
-              "-%s not understood, type aragorn -h for help\n",s);
-             break;
-     case 2: fprintf(stderr,"Could not open %s\n",s);
-             break;
-     case 3: fprintf(stderr,
-             "No sequence file specified, type aragorn -h for help\n");
-             break;
-     case 4: fprintf(stderr,"Don't know genetic code %s\n",s);
-             break;
-     case 5: fprintf(stderr,"Too many genetic code modifications (max=%d)\n",
-                     MAXGCMOD);
-             break;
-     default: break; }
-  exit(0); }
-
-
-void process_genecode_switch(char *s, csw *sw)
-{ int i,m,lmax,len[NGENECODE],anticodon,b[3];
-  long l;
-  char c,*ss,*se;
-  static char genecodetag[NGENECODE][10] =
-   { "MET",
-     "STD","VERT","YEAST","PROT","INVERT",
-     "CILIATE","DELETED","DELETED","FLATWORM","EUPLOT",
-     "BACT","ALTYEAST","ASCID","ALTFLAT","BLEP",
-     "CHLOROPH","DELETED","DELETED","DELETED","DELETED",
-     "TREM","SCEN","THRAUST","PTERO","GRAC",
-     "PACH","KARY","COND","MESO","PERI","BLAST","VACANT","CEPH" };
-  sw->geneticcode = STANDARD;
-  sw->gcfix = 1;
-  c = *s;
-  if (c >= '0')
-   if (c <= '9')
-    { lconvert(s,&l);
-      i = (int)l;
-      if ((i >= 0) && (i < NGENECODE)) sw->geneticcode = i;
-      goto MOD; }
-  for (i = 0; i < NGENECODE; i++)
-   { len[i] = 0;
-     ss = s;
-     se = genecodetag[i];
-     while (c == *ss++)
-      { if (upcasec(c) != *se++) break;
-        len[i]++; }}
-  m = -1;
-  lmax = 0;
-  i = -1;
-  while (++i < NGENECODE)
-   if (len[i] > lmax)
-    { m = i;
-      lmax = len[i]; }
-  if (m >= 0) sw->geneticcode = m;
-  else error_report(4,s);
-  MOD:
-  sw->ngcmod = 0;
-  ss = s;
-  while (ss = strpos(ss,","))
-   { if (sw->ngcmod >= MAXGCMOD) error_report(5,NULL);
-     ss++;
-     for (i = 0; i < 3; i++)
-      { b[i] = Adenine;
-        c = upcasec(ss[i]);
-        if (c == 'C') b[i] = Cytosine;
-        if (c == 'G') b[i] = Guanine;
-        if (c == 'T') b[i] = Thymine;
-        if (c == 'U') b[i] = Thymine; }
-      anticodon = ((Thymine - b[2])<<4) + ((Thymine - b[1])<<2) + (Thymine - b[0]);
-     if (!(se = strpos(ss,"="))) break;
-     se++;
-     for (i = 0; i < NAMINOACID; i++)
-      if (upcasec(se[0]) == upcasec(aaname[i][0]))
-       if (upcasec(se[1]) == upcasec(aaname[i][1]))
-        if (upcasec(se[2]) == upcasec(aaname[i][2]))
-         { aamap[sw->geneticcode][anticodon] = i;
-           sw->gcmod[sw->ngcmod] = anticodon;
-           sw->ngcmod++;
-           break; } }}
-
-
-
-void change_thresholds(csw *sw, double psthresh)
-{
-  sw->threshlevel = psthresh;
-  sw->cdsthresh *= psthresh;
-  sw->srpthresh *= psthresh;
-  sw->tmrnathresh *= psthresh;
-  sw->mtdtthresh *= psthresh;
-  sw->mttthresh *= psthresh;
-  sw->mtdthresh *= psthresh;
-  sw->trnathresh *= psthresh;
-}
-
-
-int main(int z, char *v[])
-{ int i,lv,filecounter;
-  long l;
-  double psthresh;
-  char c1,c2,c3,c4,*s;
-  data_set d;
-
+int main(int z, char *v[]) {
   // Default parameters
   static csw sw =
    { {"tRNA","tmRNA","","","CDS","overall"},
@@ -12188,273 +10030,18 @@ int main(int z, char *v[])
        45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
        10, TERM }};
 
-  sw.f = stdout;
-  d.bugmode = 0;
-  filecounter = 0;
-
-  i = 0;
-  while (++i < z)
-
-   if (*(v[i]) == '-')
-   {
-      lv = length(v[i]);
-      if (lv < 2) continue;
-      s = v[i] + 1;
-      c1 = upcasec(*s);
-      c2 = (lv > 2)?upcasec(s[1]):' ';
-      c3 = (lv > 3)?upcasec(s[2]):' ';
-      c4 = (lv > 4)?upcasec(s[3]):' ';
-      switch(c1)
-       { case  'E': sw.energydisp = (c2 == 'S')?2:1;
-                    break;
-         case  'A': if (c2 == '7') sw.extastem = 0;
-                    else
-                     if (c2 == 'A') sw.matchacceptor = 1;
-                     else
-                      if (c2 == 'M')
-                       { l = 1L;
-                         if (c3 == 'T')
-                          { if (lv > 4)
-                             { s = lconvert(s+3,&l);
-                               if (l < 1L) l = 1L;
-                               sw.trnalenmisthresh = (int)l; }
-                            else sw.trnalenmisthresh = 1; }
-                         else if (c3 == 'M')
-                          { if (lv > 4)
-                             { s = lconvert(s+3,&l);
-                               if (l < 1L) l = 1L;
-                               sw.tmrnalenmisthresh = (int)l; }
-                            else sw.tmrnalenmisthresh = 1; }
-                         else if (lv > 3)
-                          { s = lconvert(s+2,&l);
-                            if (l < 1L) l = 1L;
-                            sw.trnalenmisthresh = (int)l;
-                            sw.tmrnalenmisthresh = (int)l; }
-                         else
-                          { sw.trnalenmisthresh = 1;
-                            sw.tmrnalenmisthresh = 1; }}
-                      else sw.secstructdisp |= 1;
-                    break;
-         case  'B': if (c2 == 'R') sw.secstructdisp |= 2;
-                    else sw.libflag = 1;
-                    break;
-         case  'X': sw.libflag = 2;
-                    break;
-         case  'W': if (c2 == 'U')
-                     if (c3 == 'N')
-                      if (c4 == 'I')
-                       { d.bugmode = 1;
-                         break; }
-                    if (sw.batch < 1) sw.batch = 1;
-                    if (c2 == 'A') sw.batchfullspecies = 1;
-                    break;
-         case  'V': sw.verbose = 1;
-                    break;
-         case  'S': if (c2 == 'S')
-                     { sw.sp1max = 2;
-                       sw.sp2min = 1;
-                       sw.sp2max = 1;
-                       break; }
-                    if (c2 == 'E')
-                     { if (sw.seqdisp < 1) sw.seqdisp = 1;
-                       break; }
-                    if ((c2 == 'C') || (c2 == '-'))
-                     { sw.both = 1;
-                       break; }
-                    if ((c2 == 'V') && (c3 == 'G'))
-                     { sw.secstructdisp |= 4;
-                       break; }
-                    sw.both = 0;
-                    break;
-         case  'F': if (softstrpos(s,"O"))
-                     { sw.batch = 2;
-                       if (softstrpos(s,"S")) sw.batch |= 0x4;
-                       if (softstrpos(s,"N")) sw.batch |= 0x8;
-                       if (softstrpos(s,"C")) sw.batch |= 0x10; }
-                    else
-                     { if (softstrpos(s,"C")) sw.seqdisp = 4;
-                       else sw.seqdisp = 3; }
-                    break;
-         case  'D': sw.both = 2;
-                    break;
-         case  'L': sw.linear = 1;
-                    break;
-         case  'C': if (c2 == '7') sw.cloop7 = 1;
-                    else sw.linear = 0;
-                    break;
-         case  'J': if (lv > 2)
-                     { if (c2 == 'R') sw.aataildiv = 1;
-                       if (c3 == '4') sw.aataildisp = 1; }
-                    else sw.aataildisp = 1;
-                    break;
-         case  '1': sw.minintronlen = 10;
-                    break;
-         case  'I': if (c2 == 'O') { sw.ioverlay = 1; s++; lv--; }
-                    else if (c2 == 'F') { sw.ifixedpos = 1; s++; lv--; }
-                    else if (c2 == 'R') { sw.ireportminintronlen = 1; s++; lv--; }
-                    if (c3 == 'O') { sw.ioverlay = 1; s++; lv--; }
-                    else if (c3 == 'F') { sw.ifixedpos = 1; s++; lv--; }
-                    else if (c3 == 'R') { sw.ireportminintronlen = 1; s++; lv--; }
-                    if (c4 == 'O') { sw.ioverlay = 1; s++; lv--; }
-                    else if (c4 == 'F') { sw.ifixedpos = 1; s++; lv--; }
-                    else if (c4 == 'R') { sw.ireportminintronlen = 1; s++; lv--; }
-                    if (lv > 2) s = lconvert(s+1,&l);
-                    else goto IMAX;
-                    if (*s == ',')
-                     { if (sw.ireportminintronlen == 1)
-                        sw.minintronlenreport = (int)l;
-                       else
-                        sw.minintronlen = (int)l;
-                       lconvert(s+1,&l);
-                       sw.maxintronlen = (int)l; }
-                    else sw.maxintronlen = (int)l;
-                    if (sw.maxintronlen > (LSEQ - MAXTRNALEN))
-                     sw.maxintronlen = (LSEQ - MAXTRNALEN);
-                    if (sw.maxintronlen > MAXINTRONLEN)
-                     sw.maxintronlen = MAXINTRONLEN;
-                    if ((sw.minintronlen < 0) ||
-                     (sw.maxintronlen < sw.minintronlen))
-                      error_report(1,v[i]);
-                    if ((sw.minintronlenreport < 0) ||
-                     (sw.maxintronlen < sw.minintronlenreport))
-                      error_report(1,v[i]);
-                    break;
-                    IMAX:
-                    sw.maxintronlen = MAXINTRONLEN;
-                    break;
-         case  'T': if (c2 == 'V')
-                     { sw.tvloop = 0;
-                       break; }
-                    sw.trna = 1;
-                    if (lv > 2)
-                     { s = dconvert(s+1,&sw.trnathresh);
-                       if (*s == ',') dconvert(s+1,&sw.ttarmthresh); }
-                    break;
-         case  'M': if (c2 == 'T')
-                     { sw.mtrna = 1;
-                       if (!sw.gcfix) sw.geneticcode = METAZOAN_MT;
-                       if (lv > 3)
-                        { s += 2;
-                          c3 = upcasec(*s);
-                          if (c3 == 'M')
-                           { do c3 = upcasec(*++s);
-                             while ((c3 == 'A') || (c3 == 'M')
-                                     || (c3 == 'L'));
-                             sw.tvloop = 0;
-                             sw.geneticcode = VERTEBRATE_MT;
-                             sw.discrim = MAMMAL_MT; }
-
-                          MTNXTC:
-                          if (c3 == 'X')
-                           { c3 = upcasec(*++s);
-                             sw.mtxdetect = 0;
-                             goto MTNXTC; }
-                          if (c3 == 'C')
-                           { c3 = upcasec(*++s);
-                             sw.mtcdsscan = 0;
-                             goto MTNXTC; }
-                          if (c3 == 'D')
-                           { c3 = upcasec(*++s);
-                             sw.mtcompov = 1;
-                             goto MTNXTC; }
-
-                          if (c3 != '-')
-                           if (c3 != '.')
-                            if ((c3 < '0') || (c3 > '9'))
-                             break;
-                          s = dconvert(s,&sw.mtdtthresh);
-                          if (*s == ',') s = dconvert(s+1,&sw.mttthresh);
-                          if (*s == ',') s = dconvert(s+1,&sw.mtdthresh);
-                          if (*s == ',') s = dconvert(s+1,&sw.mttarmthresh);
-                          if (*s == ',') dconvert(s+1,&sw.mtdarmthresh); }
-                     } else {
-                        sw.tmrna = 1;
-                        if (c2 == 'U')
-                          if (c3 == 'T')
-                            { sw.updatetmrnatags = 1;
-                               lv -= 2;
-                               s += 2;
-                            }
-                        if (lv > 2) dconvert(s+1,&sw.tmrnathresh); }
-                    break;
-         case  'P': if (c2 == 'S')
-                     { if (c3 != '-')
-                        if (c3 != '.')
-                         if ((c3 < '0') || (c3 > '9'))
-                          { change_thresholds(&sw,PSEUDOGENElevel);
-                            break; }
-                       psthresh = 1.0;
-                       dconvert(s+2,&psthresh);
-                       change_thresholds(&sw,psthresh);
-                       break; }
-                    break;
-         case  'G': if (c2 != 'C') break;
-                    process_genecode_switch(s+2,&sw);
-                    break;
-         case  'R': if (c2 == 'N') sw.repeatsn = 1;
-                    else
-                     if (c2 == 'P')
-                      { sw.reportpseudogenes = 1;
-                        if (lv > 3)
-                         dconvert(s+2,&sw.reportpsthresh); }
-                     else sw.tmstrict = 0;
-                    break;
-         case  'Q': sw.showconfig = 0;
-                    break;
-         case  'H': aragorn_help_menu();
-                    exit(0);
-         case  'O': if (lv > 2)
-                     s++;
-                    else
-                     { if (++i >= z) break;
-                       s = v[i]; }
-                    sw.f = fopen(s,"w");
-                    if (!sw.f) error_report(2,s);
-                    break;
-         default:   error_report(0,s); }
-   }
-
-   else
-   {
-    if (filecounter < 1)
-    { d.f = fopen(v[i],"r");
-       if (d.f)
-        filecounter++;
-       else
-        error_report(2,v[i]);
-    }
-    else
-    {
-     if (filecounter < 2)
-      { sw.f = fopen(v[i],"w");
-        if (!sw.f) error_report(2,v[i]);
-        filecounter++; }
-     else
-       error_report(0,v[i]);
-    }
-  }
-
-  if (filecounter < 1)
-   error_report(3,NULL);
-  if ((!sw.trna) & (!sw.tmrna))
-   { sw.trna = 1;
-     sw.tmrna = 1; }
-  if (sw.mtrna) sw.trna = 0;
-  ts = (gene *)malloc(NT*sizeof(gene));
-  if (ts == NULL)
-   { fprintf(stderr,"Not enough memory available to store detected genes\n");
-     exit(1); }
+  sw.trna = 1;
+  sw.linear = 1;
+  sw.batch = 1;
   sw.genespace = NT;
-  if (sw.libflag) fprintf(sw.f,"Library\n");
-  if (sw.batch) bopt_fastafile(&d,&sw);
-  else iopt_fastafile(&d,&sw);
-  free((void *)ts);
-  fclose(d.f);
-  if (!sw.batch && sw.showconfig)
-   { fprintf(sw.f,"Configuration: ");
-     i = -1;
-     while (++i < z) fprintf(sw.f,"%s ",v[i]);
-     fputc('\n',sw.f); }
-  if (sw.f != stdout) fclose(sw.f);
-  return(0);
-}
+
+  data_set d;
+  d.f = fopen("test.fasta","r");
+
+  ts = (gene *)malloc(NT*sizeof(gene));
+
+  bopt_fastafile(&d,&sw);
+
+  fprintf(stdout, "hi\n");
+
+  fclose(d.f); }
