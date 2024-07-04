@@ -29,35 +29,92 @@
 #define GCBOND      3.0
 
 
-typedef struct { int* seq;
-                 long size; } dna_sequence;
+class DnaSequence {
+  public:
+    int* seq;
+    long size;
 
-typedef struct { int *ps;
-                 int nbase;
-                 int comp;
-                 long start;
-                 long stop;
-                 int astem1;
-                 int astem2;
-                 int aatail;
-                 int spacer1;
-                 int spacer2;
-                 int dstem;
-                 int dloop;
-                 int cstem;
-                 int cloop;
-                 int intron;
-                 int nintron;
-                 int anticodon;
-                 int var;
-                 int varbp;
-                 int tstem;
-                 int tloop;
-                 int genetype;
-                 double energy;
-                 int asst;
-                 int tps;
-                 int tpe; } gene;
+  DnaSequence(){
+    seq = NULL;
+    size = 0;
+  }
+
+  DnaSequence(std::string &dna){
+    size = dna.size();
+    seq = (int*)malloc(size * sizeof(int));
+    for(int i = 0; i < size; i++){
+      switch(dna[i]) {
+        case 'A':
+          seq[i] = Adenine;
+          break;
+        case 'T':
+          seq[i] = Thymine;
+          break;
+        case 'G':
+          seq[i] = Guanine;
+          break;
+        case 'C':
+          seq[i] = Cytosine;
+          break;
+        default:
+          seq[i] = AMBIG;
+      }
+    }
+  }
+
+};
+
+class Gene {
+  public:
+    int *ps;
+    int nbase;
+    int comp;
+    long start;
+    long stop;
+    int astem1;
+    int astem2;
+    int aatail;
+    int spacer1;
+    int spacer2;
+    int dstem;
+    int dloop;
+    int cstem;
+    int cloop;
+    int intron;
+    int nintron;
+    int anticodon;
+    int var;
+    int varbp;
+    int tstem;
+    int tloop;
+    int genetype;
+    double energy;
+
+  Gene () {
+    ps        = NULL;
+    nbase     = 0;
+    comp      = 0;
+    start     = 0L;
+    stop      = 0L;
+    astem1    = 7;
+    astem2    = 7;
+    aatail    = 1;
+    spacer1   = 2;
+    spacer2   = 1;
+    dstem     = 3;
+    dloop     = 9;
+    cstem     = 5;
+    cloop     = 7;
+    intron    = 0;
+    nintron   = 0;
+    anticodon = 0;
+    var       = 15;
+    varbp     = 0;
+    tstem     = 5;
+    tloop     = 7;
+    energy    = 0.0;
+  }
+};
 
 typedef struct { int *pos;
                  int stem; // length of the T-stem (4 or 5)
@@ -75,31 +132,50 @@ typedef struct { int *pos1;
                  int stem;
                  double energy; } trna_astem;
 
-typedef struct { int trna;
-                 int tmrna;
-                 int mtrna;
-                 int cloop7;
-                 int extastem;
-                 int aataildiv;
-                 int sp1max;
-                 int sp2min;
-                 int sp2max;
-                 int maxintronlen;
-                 int minintronlen;
-                 int ifixedpos;
-                 int loffset;
-                 int roffset;
-                 double threshlevel;
-                 double trnathresh;
-                 double ttscanthresh;
-                 double ttarmthresh;
-                 double tdarmthresh;
-                 double tastemthresh;
-                 double tascanthresh;
-                 double mttthresh;
-                 double mtdthresh;
-                 double mtdtthresh;
-               } csw;
+class Config {
+  public:
+    int cloop7;
+    int extastem;
+    int aataildiv;
+    int sp1max;
+    int sp2min;
+    int sp2max;
+    int maxintronlen;
+    int minintronlen;
+    int ifixedpos;
+    int loffset;
+    int roffset;
+    double threshlevel;
+    double trnathresh;
+    double ttscanthresh;
+    double ttarmthresh;
+    double tdarmthresh;
+    double tastemthresh;
+    double tascanthresh;
+
+    Config()
+    {
+      cloop7       = 0;
+      extastem     = 1;
+      aataildiv    = 0;
+      sp1max       = 3;
+      sp2min       = 0;
+      sp2max       = 2;
+      maxintronlen = 0;
+      minintronlen = 0;
+      ifixedpos    = 0;
+      loffset      = MAXTAGDIST + 20;
+      roffset      = MAXTAGDIST + 20;
+      threshlevel  = 1.0;
+      trnathresh   = 132.0;
+      ttscanthresh = 4.0;
+      ttarmthresh  = 29.0;
+      tdarmthresh  = 26.0;
+      tastemthresh = 7.5;
+      tascanthresh = 8.0;
+    }
+
+};
 
 
 /* Basepair matching matrices */
@@ -201,14 +277,14 @@ trna_loop make_trna_loop(int* pos, int loop, int stem, double energy){
 
 
 // find all tstems in the sequence
-std::vector<trna_loop> find_tstems(dna_sequence *seq, csw sw) {
+std::vector<trna_loop> find_tstems(DnaSequence& seq, Config sw) {
   std::vector<trna_loop> hits;
 
-  int *s = seq->seq;
-  int ls = seq->size;
+  int *s = seq.seq;
+  int ls = seq.size;
 
   int r,c,tstem,tloop;
-  int *s1,*s2,*se,*ss,*si,*sb,*sc,*sf,*sl,*sx,*tem;
+  int *s1,*s2,*se,*ss,*si,*sb,*sc,*sf,*sl,*sx;
   double ec,energy,penalty;
   static double bem[6][6] = {
   //    A        C       G       T
@@ -223,11 +299,8 @@ std::vector<trna_loop> find_tstems(dna_sequence *seq, csw sw) {
   static double C[6] = { 0.0,2.0,0.0,0.0,0.0,0.0 };
   static double G[6] = { 0.0,0.0,2.0,0.0,0.0,0.0 };
   static double T[6] = { 0.0,0.0,0.0,2.0,0.0,0.0 };
-                           // A       C       G       T       -       -
-  static int tem_trna[6]  = { 0x0100, 0x0002, 0x2000, 0x0220, 0x0000, 0x0000 };
-  static int tem_tmrna[6] = { 0x0100, 0x0002, 0x2220, 0x0220, 0x0000, 0x0000 };
-
-  tem = (sw.tmrna || (sw.threshlevel < 1.0))?tem_tmrna:tem_trna;
+                      // A       C       G       T       -       -
+  static int tem[6]  = { 0x0100, 0x0002, 0x2000, 0x0220, 0x0000, 0x0000 };
 
   // left starting position after applying offset
   ss = s + sw.loffset;
@@ -304,7 +377,7 @@ std::vector<trna_loop> find_tstems(dna_sequence *seq, csw sw) {
 }
 
 
-std::vector<trna_loop> find_astem5(int *si, int *sl, int *astem3, int n3, csw sw){
+std::vector<trna_loop> find_astem5(int *si, int *sl, int *astem3, int n3, Config sw){
   std::vector<trna_loop> hits;
   int k;
   int *s1,*s2,*se;
@@ -357,7 +430,7 @@ std::vector<trna_loop> find_astem5(int *si, int *sl, int *astem3, int n3, csw sw
   return(hits); }
 
 
-int aatail(int *s, int *ext, csw sw){
+int aatail(int *s, int *ext, Config& sw){
   int score,e;
   static int A[6] = { 1,0,0,0,0,0 };
   static int C[6] = { 0,1,0,0,0,0 };
@@ -392,31 +465,31 @@ int aatail(int *s, int *ext, csw sw){
      *ext = e;
      return(score); }}
 
-void ti_genedetected(int *seq, gene *te, csw sw) {
+void ti_genedetected(int *seq, Gene& te, Config& sw) {
   int as,aext,as8,aext8,*s;
-  te->nbase = te->astem1 + te->spacer1 + te->spacer2 + 2*te->dstem +
-              te->dloop +  2*te->cstem + te->cloop +
-              te->var + 2*te->tstem + te->tloop + te->astem2;
-  s = te->ps + te->nbase + te->nintron;
+  te.nbase = te.astem1 + te.spacer1 + te.spacer2 + 2*te.dstem +
+              te.dloop +  2*te.cstem + te.cloop +
+              te.var + 2*te.tstem + te.tloop + te.astem2;
+  s = te.ps + te.nbase + te.nintron;
   as = aatail(s,&aext,sw);
   if (sw.extastem)
-   if (te->astem1 == 7)
-    if (bp[te->ps[-1]][*s])
+   if (te.astem1 == 7)
+    if (bp[te.ps[-1]][*s])
      { as8 = aatail(s+1,&aext8,sw);
        if (as8 >= as)
-        { te->ps--;
-          te->nbase += 2;
-          te->anticodon++;
-          if (te->nintron > 0) te->intron++;
-          te->astem1 = 8;
-          te->astem2 = 8;
+        { te.ps--;
+          te.nbase += 2;
+          te.anticodon++;
+          if (te.nintron > 0) te.intron++;
+          te.astem1 = 8;
+          te.astem2 = 8;
           as = as8;
           aext = aext8; }}
-  te->nbase += aext;
-  te->start = (long)(te->ps - seq);
-  te->stop = (long)(te->ps - seq + te->nbase); }
+  te.nbase += aext;
+  te.start = (long)(te.ps - seq);
+  te.stop = (long)(te.ps - seq + te.nbase); }
 
-hit make_hit(gene &g){
+hit make_hit(Gene &g){
     hit h;
     h.start = g.start;
     h.stop = g.stop;
@@ -424,34 +497,10 @@ hit make_hit(gene &g){
     return h;
 }
 
-dna_sequence* as_sequence(std::string &dna){
-  dna_sequence* d = (dna_sequence*)malloc(sizeof(dna_sequence));
-  d->size = dna.size();
-  int* seq = (int*)malloc(d->size * sizeof(int));
-  for(int i = 0; i < d->size; i++){
-    switch(dna[i]) {
-      case 'A': 
-        seq[i] = Adenine;
-        break;
-      case 'T': 
-        seq[i] = Thymine;
-        break;
-      case 'G': 
-        seq[i] = Guanine;
-        break;
-      case 'C': 
-        seq[i] = Cytosine;
-        break;
-      default: 
-        seq[i] = AMBIG;
-    }
-  }
-  d->seq = seq;
-  return(d);  
-}
-
 std::vector<hit> predict_trnas(std::string &dna) {
-  dna_sequence* seq;
+
+  DnaSequence seq = DnaSequence(dna);
+
   int i,j,k,intron,nd1,nd2,ndx,ndh,nc,nch,tfold,tarm;
   int dstem,dloop,tmindist,tmaxdist;
   int ige[7];
@@ -525,62 +574,13 @@ std::vector<hit> predict_trnas(std::string &dna) {
   trna_loop chit[NC];
   trna_dloop dhit[ND];
 
-  static csw sw;
-  sw.trna         = 1;
-  sw.tmrna        = 0;
-  sw.mtrna        = 0;
-  sw.cloop7       = 0;
-  sw.extastem     = 1;
-  sw.aataildiv    = 0;
-  sw.sp1max       = 3;
-  sw.sp2min       = 0;
-  sw.sp2max       = 2;
-  sw.maxintronlen = 0;
-  sw.minintronlen = 0;
-  sw.ifixedpos    = 0;
-  sw.loffset      = MAXTAGDIST + 20;
-  sw.roffset      = MAXTAGDIST + 20;
-  sw.threshlevel  = 1.0;
-  sw.trnathresh   = 132.0;
-  sw.ttscanthresh = 4.0;
-  sw.ttarmthresh  = 29.0;
-  sw.tdarmthresh  = 26.0;
-  sw.tastemthresh = 7.5;
-  sw.tascanthresh = 8.0;
+  static Config sw = Config();
 
-  gene te;
-
-  gene t;
-  t.ps        = NULL;
-  t.nbase     = 0;
-  t.comp      = 0;
-  t.start     = 0L;
-  t.stop      = 0L;
-  t.astem1    = 7;
-  t.astem2    = 7;
-  t.aatail    = 1;
-  t.spacer1   = 2;
-  t.spacer2   = 1;
-  t.dstem     = 3;
-  t.dloop     = 9;
-  t.cstem     = 5;
-  t.cloop     = 7;
-  t.intron    = 0;
-  t.nintron   = 0;
-  t.anticodon = 0;
-  t.var       = 15;
-  t.varbp     = 0;
-  t.tstem     = 5;
-  t.tloop     = 7;
-  t.energy    = 0.0;
-  t.asst      = 0;
-  t.tps       = 0;
-  t.tpe       = 0;
+  Gene te = Gene();
+  Gene t = Gene();
 
   tmindist = (MINTRNALEN + sw.minintronlen - MAXTSTEM_DIST);
   tmaxdist = (MAXTRNALEN + sw.maxintronlen - MINTSTEM_DIST);
-
-  seq = as_sequence(dna);
 
   // Try to make a tRNA gene for each predicted T-loop
   for(auto & tloop : find_tstems(seq, sw))
@@ -961,14 +961,14 @@ std::vector<hit> predict_trnas(std::string &dna) {
           if (t.nintron > 0) {
             t.intron = j + intron;
             if ((t.nbase + t.nintron) > MAXTRNALEN) {
-              ti_genedetected(seq->seq,&t,sw);
+              ti_genedetected(seq.seq,t,sw);
               gs.push_back(make_hit(t));
               continue;
             }
           }
           if (energy < te.energy) continue;
           te = t;
-          ti_genedetected(seq->seq,&t,sw);
+          ti_genedetected(seq.seq,t,sw);
           gs.push_back(make_hit(t));
         }
       }
