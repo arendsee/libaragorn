@@ -1,3 +1,6 @@
+#ifndef __ARAGORN_TRNA_H__
+#define __ARAGORN_TRNA_H__
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,7 +41,6 @@
 
 #define NA          MAXINTRONLEN
 #define ND          100
-#define NTH         3000
 #define NC          5000
 #define ATBOND      2.5
 #define GCBOND      3.0
@@ -74,8 +76,12 @@ typedef struct { int *ps;
                  int tps;
                  int tpe; } gene;
 
+typedef struct { long start;
+                 long stop;
+                 double energy; } hit;
+
 typedef struct { int *pos;
-                 int stem;
+                 int stem; // length of the T-stem (4 or 5)
                  int loop;
                  double energy; } trna_loop;
 
@@ -102,7 +108,6 @@ typedef struct { int trna;
                  int maxintronlen;
                  int minintronlen;
                  int ifixedpos;
-                 int tmstrict;
                  int loffset;
                  int roffset;
                  double threshlevel;
@@ -117,18 +122,25 @@ typedef struct { int trna;
                  double mtdtthresh;
                } csw;
 
-typedef struct genes {
-  gene *gene;
-  struct genes *next;
-} genes;
+// singly-linked list
+typedef struct list {
+  void *element;
+  struct list *next;
+} list;
 
-genes* add_gene(genes* gs, gene g){
-  genes* new_root = (genes*)malloc(sizeof(genes));
-  new_root->next = gs;
-  gene* new_gene = (gene*)malloc(sizeof(gene));
-  *new_gene = g;
-  new_root->gene = new_gene;
+list* prepend(list* xs, void* x){
+  list* new_root = (list*)malloc(sizeof(list));
+  new_root->next = xs;
+  new_root->element = x;
   return new_root; 
+}
+
+list* reverse(list* xs){
+  list* rev = NULL;
+  for(; xs && xs->element; xs = xs->next){
+    rev = prepend(rev, xs->element);
+  }
+  return rev; 
 }
 
 
@@ -219,40 +231,32 @@ double vloop_stability(int *sb, int var, int *varbp){
    { *varbp = 0;
      return(-12.0); }}
 
+
+trna_loop* make_trna_loop(int* pos, int loop, int stem, double energy){
+  trna_loop* x = (trna_loop*)malloc(sizeof(trna_loop));
+  x->pos = pos;
+  x->loop = loop;
+  x->stem = stem;
+  x->energy = energy;
+  return(x);
+}
+
+
 // find all tstems in the sequence
-//
-// tstems are added as trna_loop structs to the hit array
-// the hit array is preallocated to some arbitrary size (3000 by default)
-//
-// modifies hit
-// returns the number of tstems found
-//
-// T-Loop with canonical numbering:
-//
-//                           (60) (59)
-//  (65) (64) (63) (62) (61)          (58)
-//    |    |    |    |    |            (57)
-//  (49) (50) (51) (52) (53)          (56)
-//                           (54) (55)
-//
-int find_tstems(
-  dna_sequence *seq, // sequence
-  trna_loop hit[],   // array of trna_loops (currently all NULL)
-  int nh,            // hit length
-  csw *sw            // state
-) {
+list* find_tstems(dna_sequence *seq, csw sw) {
+  list* hit = NULL;
 
   int *s = seq->seq;
   int ls = seq->size;
 
-  int i,r,c,tstem,tloop,ithresh1;
+  int r,c,tstem,tloop;
   int *s1,*s2,*se,*ss,*si,*sb,*sc,*sf,*sl,*sx,*tem;
-  double ec,energy,penalty,thresh2;
+  double ec,energy,penalty;
   static double bem[6][6] = {
   //    A        C       G       T
      { -2.144,  -0.428, -2.144,  ATBOND, 0.000, 0.000 }, // A
-     { -0.428,  -2.144,  GCBOND, -2.144,  0.000, 0.000 }, // C
-     { -2.144,   GCBOND, -2.144,  1.286,  0.000, 0.000 }, // G
+     { -0.428,  -2.144,  GCBOND, -2.144, 0.000, 0.000 }, // C
+     { -2.144,   GCBOND, -2.144,  1.286, 0.000, 0.000 }, // G
      {  ATBOND, -2.144,  1.286, -0.428,  0.000, 0.000 }, // T
      {  0.000,   0.000,  0.000,  0.000,  0.000, 0.000 },
      {  0.000,   0.000,  0.000,  0.000,  0.000, 0.000 } };
@@ -261,62 +265,90 @@ int find_tstems(
   static double C[6] = { 0.0,2.0,0.0,0.0,0.0,0.0 };
   static double G[6] = { 0.0,0.0,2.0,0.0,0.0,0.0 };
   static double T[6] = { 0.0,0.0,0.0,2.0,0.0,0.0 };
-  static int tem_trna[6] = { 0x0100, 0x0002, 0x2000, 0x0220, 0x0000, 0x0000 };
+                           // A       C       G       T       -       -
+  static int tem_trna[6]  = { 0x0100, 0x0002, 0x2000, 0x0220, 0x0000, 0x0000 };
   static int tem_tmrna[6] = { 0x0100, 0x0002, 0x2220, 0x0220, 0x0000, 0x0000 };
-  i = 0;
-  tem = (sw->tmrna || (sw->threshlevel < 1.0))?tem_tmrna:tem_trna;
-  ithresh1 = (int)sw->ttscanthresh;
-  thresh2 = sw->ttarmthresh;
-  ss = s + sw->loffset;
+
+  tem = (sw.tmrna || (sw.threshlevel < 1.0))?tem_tmrna:tem_trna;
+
+  // left starting position after applying offset
+  ss = s + sw.loffset;
+
+  // pointer to the moving t-start?
+  // And 4 - 1 because???
   si = ss + 4 - 1;
-  sl = s + ls - sw->roffset + 5 + 3;
+
+  // right ending position after applying offset
+  // And 5 + 3 because???
+  sl = s + ls - sw.roffset + 5 + 3;
+
+  // initialize the scanning bit pattern with the first three bases
   r = tem[*si++];
   r = (r >> 4) + tem[*si++];
   r = (r >> 4) + tem[*si++];
 
   while (si < sl) {
     r = (r >> 4) + tem[*si++];
-    if ((c = (r & 0xF)) < ithresh1) continue;
+
+    // The `r & 0xF` trick gets the rightmost byte from r
+    // The 4th byte contains information about the 4 prior bytes
+    // that match the pattern GTTC. The match can contain any two of these
+    // bases (at the default ttscanthresh and with tem_trna).
+    if ((c = (r & 0xF)) < (int)sw.ttscanthresh) continue;
+
+    // T-Loop with canonical numbering:
+    //
+    //                           (60) (59)
+    //  (65) (64) (63) (62) (61)          (58)
+    //    |    |    |    |    |            (57)
+    //  (49) (50) (51) (52) (53)          (56)
+    //                       G   (54) (55) C
+    //                            T    T   *
+    //
+    // subtract 7 from the start index to move from position 56 at the end of
+    // the GTTC match to the start of the loop
     sb = si - 7;
+
+    // add 13 to the end index (the extra bases allow for variation in loop size
     sf = sb + 13;
+
     ec = (double)(3*c);
+
+    // Loop through possible lengths of the T-stem
     for (tstem = 4; tstem <= 5; tstem++) {
-      if (sb >= (sl-8)) goto NX;
-      sc = sf;
-      sx = si - 2;
-      for (tloop = 5; tloop <= 9; tloop++) {
-        if (tloop > 7)
-          penalty = 3.0*(double)(tloop - tstem - 2);
-        else
-          penalty = 3.0*(double)(12 - tloop - tstem);
-        s1 = sb;
-        s2 = sc;
-        se = s1 + tstem;
-        energy = ec + bem[*se][se[4]] + bem[*s1++][*--s2] - penalty;
-        while (s1  < se) energy += bem[*s1++][*--s2];
-        energy += G[*sx] + A[sx[1]] + T[sx[3]] + C[sx[4]] + C[sx[5]];
-        if (energy >= thresh2)
-         { if (i >= nh)
-            { fprintf(stderr,"Too many tstem hits\n");
-              goto FN; }
-           hit[i].pos = sb;
-           hit[i].loop = tloop;
-           hit[i].stem = tstem;
-           hit[i].energy = energy;
-           i++; }
-        sx++;
-        sc++; }
-      NX:
+      if (sb < (sl-8)){
+        sc = sf;
+        sx = si - 2;
+        // Loop through possible sizes of the T-loop
+        for (tloop = 5; tloop <= 9; tloop++) {
+          if (tloop > 7)
+            penalty = 3.0*(double)(tloop - tstem - 2);
+          else
+            penalty = 3.0*(double)(12 - tloop - tstem);
+          s1 = sb;
+          s2 = sc;
+          se = s1 + tstem;
+          energy = ec + bem[*se][se[4]] + bem[*s1++][*--s2] - penalty;
+          while (s1 < se) energy += bem[*s1++][*--s2];
+          energy += G[*sx] + A[sx[1]] + T[sx[3]] + C[sx[4]] + C[sx[5]];
+          if (energy >= sw.ttarmthresh) {
+             hit = prepend(hit, make_trna_loop(sb, tloop, tstem, energy));
+          }
+          sx++;
+          sc++;
+        }
+      }
       if (--sb < ss) break;
       sf++;
     }
   }
+  return(hit);
+}
 
-  FN:
-  return(i); }
 
-int find_astem5(int *si, int *sl, int *astem3, int n3, trna_loop hit[], int nh, csw *sw){
-  int i,k;
+list* find_astem5(int *si, int *sl, int *astem3, int n3, csw sw){
+  list* hit = NULL;
+  int k;
   int *s1,*s2,*se;
   unsigned int r,tascanthresh;
   double tastemthresh,energy;
@@ -333,9 +365,8 @@ int find_astem5(int *si, int *sl, int *astem3, int n3, trna_loop hit[], int nh, 
      {  ATBOND, -2.144,  1.286, -0.428, 0.000, 0.000 },
      {  0.000,   0.000,  0.000,  0.000, 0.000, 0.000 },
      {  0.000,   0.000,  0.000,  0.000, 0.000, 0.000 } };
-  tascanthresh = (unsigned int)sw->tascanthresh;
-  tastemthresh = sw->tastemthresh;
-  i = 0;
+  tascanthresh = (unsigned int)sw.tascanthresh;
+  tastemthresh = sw.tastemthresh;
   sl += n3;
   se = astem3 + n3 - 1;
   tem[0] = A[*se];
@@ -360,20 +391,19 @@ int find_astem5(int *si, int *sl, int *astem3, int n3, trna_loop hit[], int nh, 
         while (s1  < se)
          energy += abem[*s1++][*--s2];
         if (energy >= tastemthresh)
-         { if (i >= nh)
-            { fprintf(stderr,"Too many astem5 hits\n");
-              goto FN; }
-           hit[i].pos = si - n3;
-           hit[i].energy = energy;
-           i++; }}}
-  FN:
-  return(i); }
+        {
+          hit = prepend(hit, make_trna_loop(si - n3, -1, -1, energy));
+        }
+      }
+   }
+  return(hit); }
 
-int aatail(int *s, int *ext, csw *sw){
+
+int aatail(int *s, int *ext, csw sw){
   int score,e;
   static int A[6] = { 1,0,0,0,0,0 };
   static int C[6] = { 0,1,0,0,0,0 };
-  if (sw->aataildiv)
+  if (sw.aataildiv)
    { score = 0;
      e = 0;
      if (A[s[3]])
@@ -404,15 +434,14 @@ int aatail(int *s, int *ext, csw *sw){
      *ext = e;
      return(score); }}
 
-void ti_genedetected(int *seq, gene *te, csw *sw) {
-  int as,aext,as8,aext8,nbasefext,*s;
-  int pseq[2*MAXETRNALEN+1];
+void ti_genedetected(int *seq, gene *te, csw sw) {
+  int as,aext,as8,aext8,*s;
   te->nbase = te->astem1 + te->spacer1 + te->spacer2 + 2*te->dstem +
               te->dloop +  2*te->cstem + te->cloop +
               te->var + 2*te->tstem + te->tloop + te->astem2;
   s = te->ps + te->nbase + te->nintron;
   as = aatail(s,&aext,sw);
-  if (sw->extastem)
+  if (sw.extastem)
    if (te->astem1 == 7)
     if (bp[te->ps[-1]][*s])
      { as8 = aatail(s+1,&aext8,sw);
@@ -425,40 +454,76 @@ void ti_genedetected(int *seq, gene *te, csw *sw) {
           te->astem2 = 8;
           as = as8;
           aext = aext8; }}
-  nbasefext = te->nbase + ASTEM2_EXT;
   te->nbase += aext;
-
   te->start = (long)(te->ps - seq);
   te->stop = (long)(te->ps - seq + te->nbase); }
 
-genes* predict_trnas(dna_sequence *seq, csw *sw) {
-  int i,j,k,intron,nt,nth,nd1,nd2,ndx,ndh,na,nah,nppah,nc,nch,tfold,tarm;
-  int dstem,dloop,mindist,maxdist,tmindist,tmaxdist,tmmindist,tmmaxdist;
-  int tarmthresh,tmstrict,sp2min,sp2max,ige[7];
+hit* make_hit(gene* g){
+    hit* h = (hit*)malloc(sizeof(hit));
+    h->start = g->start;
+    h->stop = g->stop;
+    h->energy = g->energy;
+    return h;
+}
+
+int length(char *s) {
+  int i = 0;
+  while (*s++) i++;
+  return(i); }
+
+dna_sequence* as_sequence(char* dna){
+  dna_sequence* d = (dna_sequence*)malloc(sizeof(dna_sequence));
+  d->size = length(dna);
+  int* seq = (int*)malloc(d->size * sizeof(int));
+  for(int i = 0; i < d->size; i++){
+    switch(dna[i]) {
+      case 'A': 
+        seq[i] = Adenine;
+        break;
+      case 'T': 
+        seq[i] = Thymine;
+        break;
+      case 'G': 
+        seq[i] = Guanine;
+        break;
+      case 'C': 
+        seq[i] = Cytosine;
+        break;
+      default: 
+        seq[i] = AMBIG;
+    }
+  }
+  d->seq = seq;
+  return(d);  
+}
+
+list* predict_trnas(char *dna) {
+  dna_sequence* seq;
+  int i,j,k,intron,nd1,nd2,ndx,ndh,nc,nch,tfold,tarm;
+  int dstem,dloop,tmindist,tmaxdist;
+  int ige[7];
   int *se,*sc,*sb,*si,*tpos,*tend,*apos,*dpos,*tloopfold,*tmv,*cend;
   int *s1,*s2,*sd,*sf,*sl,*sg1,*sg2,*cposmin,*cposmax,*cpos;
   unsigned int r,q,c;
-  double e,ec,he,the,thet,ethresh,energy,cenergy,denergy,ienergy;
-  double tdarmthresh,genergy,energy2,energyf,energyf6;
+  double e,ec,he,the,energy,cenergy,denergy,ienergy;
+  double genergy,energy2,energyf,energyf6;
 
   // linked list of observed genes (e.g., tRNAs)
-  genes* gs = NULL;
+  list* gs = NULL;
 
-  static unsigned int TT[6] =
-   { 0x00, 0x00, 0x00, 0x11, 0x00, 0x00 };
-  static unsigned int GG[6] =
-   { 0x00, 0x00, 0x11, 0x00, 0x00, 0x00 };
+  static unsigned int TT[6] = { 0x00, 0x00, 0x00, 0x11, 0x00, 0x00 };
+  static unsigned int GG[6] = { 0x00, 0x00, 0x11, 0x00, 0x00, 0x00 };
   static unsigned int ct[6] = { 0,0,0,0,0,0 };
   static unsigned int cA[6] = { 0,0,0,2,0,0 };
   static unsigned int cC[6] = { 0,0,2,0,0,0 };
   static unsigned int cG[6] = { 0,2,0,1,0,0 };
   static unsigned int cT[6] = { 2,0,1,0,0,0 };
-  static int yic[9] = { 1,0,0,0,0,0,0,0,0 };
-  static int tic[9] = { 1,1,0,0,0,0,0,0,0 };
+  static int yic[9]  = { 1,0,0,0,0,0,0,0,0 };
+  static int tic[9]  = { 1,1,0,0,0,0,0,0,0 };
   static int a1ic[9] = { 1,1,1,0,0,0,0,0,0 };
   static int a2ic[9] = { 1,1,1,1,0,0,0,0,0 };
   static int a3ic[9] = { 1,1,1,1,1,0,0,0,0 };
-  static int ric[9] = { 1,1,1,1,1,1,0,0,0 };
+  static int ric[9]  = { 1,1,1,1,1,1,0,0,0 };
   static int goffb[13] = { 0,0,0,0,1,2,2,2,2,2,2,2,2 };
   static int goffe[13] = { 0,0,0,0,2,3,4,4,5,6,6,6,6 };
   static int cY[6] = { 0,1,0,1,0,0 };
@@ -505,8 +570,37 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
      {  0.000,       0.000,       0.000,       0.000,      0.000, 0.000 },
      {  0.000,       0.000,       0.000,       0.000,      0.000, 0.000 } };
 
-  trna_loop thit[NTH],chit[NC],ahit[NA];
+  trna_loop chit[NC];
   trna_dloop dhit[ND];
+
+  list* trna_loop_hits;
+  trna_loop* trna_loop_ptr;
+
+  list* astem5_hits;
+  trna_loop*  astem5_ptr;
+
+  static csw sw;
+  sw.trna         = 1;
+  sw.tmrna        = 0;
+  sw.mtrna        = 0;
+  sw.cloop7       = 0;
+  sw.extastem     = 1;
+  sw.aataildiv    = 0;
+  sw.sp1max       = 3;
+  sw.sp2min       = 0;
+  sw.sp2max       = 2;
+  sw.maxintronlen = 0;
+  sw.minintronlen = 0;
+  sw.ifixedpos    = 0;
+  sw.loffset      = MAXTAGDIST + 20;
+  sw.roffset      = MAXTAGDIST + 20;
+  sw.threshlevel  = 1.0;
+  sw.trnathresh   = 132.0;
+  sw.ttscanthresh = 4.0;
+  sw.ttarmthresh  = 29.0;
+  sw.tdarmthresh  = 26.0;
+  sw.tastemthresh = 7.5;
+  sw.tascanthresh = 8.0;
 
   gene te;
 
@@ -538,53 +632,55 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
   t.tps       = 0;
   t.tpe       = 0;
 
-  ethresh = sw->trnathresh;
-  tmmindist = MINTPTSDIST + MINTPDIST;
-  tmmaxdist = MAXTPTSDIST + MAXTPDIST;
-  tmindist = (MINTRNALEN + sw->minintronlen - MAXTSTEM_DIST);
-  tmaxdist = (MAXTRNALEN + sw->maxintronlen - MINTSTEM_DIST);
-  mindist = tmindist;
-  maxdist = tmaxdist;
-  tarmthresh = sw->ttarmthresh;
-  tdarmthresh = sw->tdarmthresh;
-  tmstrict = sw->tmstrict;
-  sp2min = sw->sp2min;
-  sp2max = sw->sp2max;
+  tmindist = (MINTRNALEN + sw.minintronlen - MAXTSTEM_DIST);
+  tmaxdist = (MAXTRNALEN + sw.maxintronlen - MINTSTEM_DIST);
 
-  // effect: updates thit
-  nth = find_tstems(seq,thit,NTH,sw);
+  seq = as_sequence(dna);
 
-  nt = -1;
-  while (++nt < nth) {
-    tpos = thit[nt].pos;
-    t.tloop = thit[nt].loop;
-    t.tstem = thit[nt].stem;
+  for(trna_loop_hits = find_tstems(seq, sw);
+      trna_loop_hits && trna_loop_hits->element;
+      trna_loop_hits = trna_loop_hits->next)
+  {
+    trna_loop_ptr = (trna_loop*) trna_loop_hits->element;
+
+    tpos = trna_loop_ptr->pos;
+    t.tloop = trna_loop_ptr->loop;
+    t.tstem = trna_loop_ptr->stem;
     tfold = tpos[-1];
     tloopfold = tpos + t.tstem + 1;
     tarm = 2*t.tstem + t.tloop;
     tend = tpos + tarm;
-    tmv = tpos - VARMIN;
-    te.energy = ethresh;
-    the = thit[nt].energy;
 
-    nah = find_astem5(tpos-maxdist,tpos-mindist,tend,7,ahit,NA,sw);
-    if (sw->threshlevel < 1.0) { /* find_tstems is generating extra tstems */
+    /* fprintf(stdout, "%d %p %p tloop=%d tstem=%d\n", tarm, tpos, tend, t.tstem, t.tloop); */
+
+    tmv = tpos - VARMIN;
+    te.energy = sw.trnathresh;
+    the = trna_loop_ptr->energy; 
+
+    if (sw.threshlevel < 1.0) { /* find_tstems is generating extra tstems */
        the -= (G[tpos[t.tstem]] + G[tpos[t.tstem+1]]);
-       if (the < tarmthresh) continue;
+       if (the < sw.ttarmthresh) continue;
     }
-    na = -1;
-    while (++na < nah) {
-      apos = ahit[na].pos;
+
+    for(
+      astem5_hits = find_astem5(tpos-tmaxdist,tpos-tmindist,tend,7,sw);
+      astem5_hits && astem5_hits->element;
+      astem5_hits = astem5_hits->next
+    ){
+      astem5_ptr = (trna_loop*) astem5_hits->element;
+      apos = astem5_ptr->pos;
+
       if (apos < (tpos - tmaxdist)) continue;
       if (apos > (tpos - tmindist)) break;
-      he = the + ahit[na].energy;
+
+      he = the + astem5_ptr->energy;
 
       /* find dstems */
      
       ndh = 0;
       sc = apos + 8;
       energyf = dfem[sc[5]][tfold];
-      sl = sc + sw->sp1max;
+      sl = sc + sw.sp1max;
       while (sc < sl) {
         energy2 = dT[sc[-2]] + RH[*(sc-1)] + GC[*sc] + dfem[sc[-2]][sc[4]];
         energyf6 = dfem[sc[6]][tfold];
@@ -600,7 +696,7 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
           s2 = se;
           sf = s1 + dstem;
           while (s1 < sf) energy += dbem[*s1++][*--s2];
-          if (energy >= tdarmthresh) {
+          if (energy >= sw.tdarmthresh) {
             if (ndh >= ND) goto DFL;
             dhit[ndh].pos = sc;
             dhit[ndh].end = se;
@@ -631,7 +727,7 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
             s2 = se;
             sf = s1 + dstem;
             while (s1 < sf) energy += dbem[*s1++][*--s2];
-            if (energy >= tdarmthresh) {
+            if (energy >= sw.tdarmthresh) {
                if (ndh >= ND) goto DFL;
                dhit[ndh].pos = sc;
                dhit[ndh].end = se;
@@ -657,7 +753,7 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
           s2 = sd;
           sf = s1 + 6;
           while (s1 < sf) energy += dbem[*s1++][*--s2];
-          if (energy >= tdarmthresh)
+          if (energy >= sw.tdarmthresh)
            { if (ndh >= ND) goto DFL;
              dhit[ndh].pos = sc;
              dhit[ndh].end = sd;
@@ -681,7 +777,7 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
           s2 = sd;
           sf = s1 + 7;
           while (s1 < sf) energy += dbem[*s1++][*--s2];
-          if (energy >= tdarmthresh)
+          if (energy >= sw.tdarmthresh)
            { if (ndh >= ND) goto DFL;
              dhit[ndh].pos = sc;
              dhit[ndh].end = sd;
@@ -693,6 +789,8 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
         energyf = energyf6;
         sc++;
       }
+      /* fprintf(stdout, "\n"); */
+
       goto DFN;
       DFL:
       fprintf(stderr,"Too many D-stem hits\n");
@@ -755,14 +853,14 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
         if (cpos < cposmin) cposmin = cpos;
         if (cpos > cposmax) cposmax = cpos;
       }
-      for (cpos = cposmin + sp2min; cpos <= (cposmax + sp2max); cpos++) {
+      for (cpos = cposmin + sw.sp2min; cpos <= (cposmax + sw.sp2max); cpos++) {
         denergy = -INACTIVE;
         ndx = -1;
         nd1 = ndh;
         while (--nd1 >= 0) {
           if (!dhit[nd1].end) continue;
-          if ((dhit[nd1].end + sp2max) < cpos) continue;
-          if ((dhit[nd1].end + sp2min) > cpos) continue;
+          if ((dhit[nd1].end + sw.sp2max) < cpos) continue;
+          if ((dhit[nd1].end + sw.sp2min) > cpos) continue;
           e = dhit[nd1].energy;
           if (e > denergy)
            { denergy = e;
@@ -835,8 +933,8 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
           t.cstem = chit[nc].stem;
           intron = 0;
           if (t.cloop < 9) {
-            if (sw->minintronlen > 0) continue;
-            if (sw->cloop7)
+            if (sw.minintronlen > 0) continue;
+            if (sw.cloop7)
              if (t.cloop != 7) continue;
             t.nintron = 0;
             if (t.var > 17) energy += vloop_stability(cend,t.var,&t.varbp);
@@ -844,14 +942,14 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
             energy += T[*(sb + 1)] + Y[*(sb)] + R[*(sb + 5)] - 0.05*t.var - ((t.cloop == 7)?0.0:6.0);
           } else {
             t.nintron = t.cloop - 7;
-            if (t.nintron > sw->maxintronlen) continue;
-            if (t.nintron < sw->minintronlen) continue;
+            if (t.nintron > sw.maxintronlen) continue;
+            if (t.nintron < sw.minintronlen) continue;
             if (t.var > 17) energy += vloop_stability(cend,t.var,&t.varbp);
             if (energy < (te.energy - 9.0)) continue;
             t.cloop = 7;
             sb = cpos + t.cstem;
             se = sb + t.nintron;
-            if (sw->ifixedpos) {
+            if (sw.ifixedpos) {
               intron = 6;
               cenergy = YP[*sb] + T[sb[1]] + RP[sb[5]];
             } else {
@@ -909,7 +1007,7 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
               if (sb[4 + a3ic[intron]*t.nintron] == Adenine)
                energy += 4.0;
           }
-          if (energy < ethresh) continue;
+          if (energy < sw.trnathresh) continue;
           t.energy = energy;
           t.dstem = dstem;
           t.astem1 = (t.dstem < 6)?7:((t.tstem < 5)?9:8);
@@ -926,14 +1024,14 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
             t.intron = j + intron;
             if ((t.nbase + t.nintron) > MAXTRNALEN) {
               ti_genedetected(seq->seq,&t,sw);
-              gs = add_gene(gs, t);
+              gs = prepend(gs, make_hit(&t));
               continue;
             }
           }
           if (energy < te.energy) continue;
           te = t;
           ti_genedetected(seq->seq,&t,sw);
-          gs = add_gene(gs, t);
+          gs = prepend(gs, make_hit(&t));
         }
       }
     }
@@ -941,78 +1039,4 @@ genes* predict_trnas(dna_sequence *seq, csw *sw) {
   return(gs);
 }
 
-
-/* Helpers */
-
-int length(char *s) {
-  int i = 0;
-  while (*s++) i++;
-  return(i); }
-
-dna_sequence* as_sequence(char* dna){
-  dna_sequence* d = (dna_sequence*)malloc(sizeof(dna_sequence));
-  d->size = length(dna);
-  int* seq = (int*)malloc(d->size * sizeof(int));
-  for(int i = 0; i < d->size; i++){
-    switch(dna[i]) {
-      case 'A': 
-        seq[i] = Adenine;
-        break;
-      case 'T': 
-        seq[i] = Thymine;
-        break;
-      case 'G': 
-        seq[i] = Guanine;
-        break;
-      case 'C': 
-        seq[i] = Cytosine;
-        break;
-      default: 
-        seq[i] = AMBIG;
-    }
-  }
-  d->seq = seq;
-  return(d);  
-}
-
-
-int main(int z, char *v[]) {
-  // Default parameters
-  static csw sw;
-
-  sw.trna         = 1;
-  sw.tmrna        = 0;
-  sw.mtrna        = 0;
-  sw.cloop7       = 0;
-  sw.extastem     = 1;
-  sw.aataildiv    = 0;
-  sw.sp1max       = 3;
-  sw.sp2min       = 0;
-  sw.sp2max       = 2;
-  sw.maxintronlen = 0;
-  sw.minintronlen = 0;
-  sw.ifixedpos    = 0;
-  sw.tmstrict     = 1;
-  sw.loffset      = MAXTAGDIST + 20;
-  sw.roffset      = MAXTAGDIST + 20;
-  sw.threshlevel  = 1.0;
-  sw.trnathresh   = 132.0;
-  sw.ttscanthresh = 4.0;
-  sw.ttarmthresh  = 29.0;
-  sw.tdarmthresh  = 26.0;
-  sw.tastemthresh = 7.5;
-  sw.tascanthresh = 8.0;
-
-  char* test_seq = "GCAAGATTGCCATCTACTGGGAAGGCGAATTTGTGTGGCAGAACACGGAAGACCAGCGCGACGACATCAAGGGCATCCATCTTCAAGATGATGGCAACTTTGTCTTGTAGTAAGTATCTTAACCTGTGGAGTGGTATTGCAGAAGCTGATTAGTTACTTAGTACCCATGACGACGAAGCTGTTTGGGCTTCTGATACTTGTGGCCAGGGTGACGAGGTCTATCTGGTTGTGCAGGATGATGGAAATGTAGTCTTGTACAAGGGCGAGGATGATGAAGCTGAGGCCGTTTGGGCGACTAGCACCAACCAGATTTAAGCATCGCAAGCTAGTTTTTTTATCTGTGAATAAGAAGGAACATGAAAAGAACAACAGCATTACTACGGCACTCTTATGATTTAAGCCTCAATATGTCCTTTGAATGGTCCAAGCCGTGAATGTCACTGTAAGTAAGTTCAGACTGCATAGTCCCTATTCTGAAGATTGATCAGACATCATCAAGAGCCACGCCCGGTTAGCTCAATCGGTAGAGCGTGAGACTCTTACGAGTACGCGATCTCAAGGTTGCGGGTTCGACCCCCGCATCGGGCTGTTCCTATATTCGATTGCGAGCGTTAGCGAGGCTTTCATTTTTGCATTTTTGTTCTTTGGTACCTTTAAACCTTGCATCTATCTATCTTACGTGCACTGTTCAGTGGATGGAAGAATAAAGTTGTGGACACGTAATGCTCTACTTACTTTGAGTTTATCTTTTTACTTGGAACAGATTTTGAGTTTATGCTCCGCGGACCCCGCCTTGATTTTGTGAGGCTGTGATGTCGCCATTTCCGGAGTGGCATTATCATTTCATCTTTACGCAGATCAACATAAACCACAAAGTTAACCATGCGCATCGAAAAGTATCCCTTATCTCCGCCTAGCTTGGAGGAAGTGGCTGTTAAACTTCAAGCACCCTTGGCAGCCAATTATGAGCACTCCACAGTGAGTGTCGTTTCCTGCCCGGATCTTCGGCAAGCACCCTATCATCTAGCGACCGAGGGGCTATCAGGAGATGAGAAG";
-
-  dna_sequence* seq = as_sequence(test_seq);
-
-  genes* gs = predict_trnas(seq, &sw);
-
-  while(gs && gs->gene){
-    fprintf(stdout, "(%d,%d)\n", gs->gene->start, gs->gene->stop);
-    gs = gs->next;
-  }
-
-  return(0);
-}
+#endif
