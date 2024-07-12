@@ -1,7 +1,8 @@
-#include "aragorn-trna.h"
+#include "aragorn-trna.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <algorithm>
 
 #define INACTIVE        2.0e+35
 
@@ -164,8 +165,8 @@ class Config {
       maxintronlen = 0;
       minintronlen = 0;
       ifixedpos    = 0;
-      loffset      = MAXTAGDIST + 20;
-      roffset      = MAXTAGDIST + 20;
+      loffset      = 0;
+      roffset      = 20;
       threshlevel  = 1.0;
       trnathresh   = 132.0;
       ttscanthresh = 4.0;
@@ -497,6 +498,36 @@ hit make_hit(Gene &g){
     return h;
 }
 
+
+struct {
+    bool operator()(hit a, hit b) const { return a.start < b.start; }
+} hitComparator;
+
+std::vector<hit> best_hit(std::vector<hit> hits) {
+  // sort hits by energy
+  std::sort(hits.begin(), hits.end(), hitComparator);
+
+  std::vector<hit> best_hits;
+
+  // initialize
+  if (hits.size() > 0) {
+    best_hits.push_back(hits[0]);
+  }
+
+  // for hits that overlap, keep only the highest energy one
+  hit last;
+  for(auto & hit : hits){
+    last = best_hits[best_hits.size() - 1];
+    if (hit.start > last.stop) {
+      best_hits.push_back(hit);
+    } else if (hit.energy > last.energy) {
+      best_hits[best_hits.size() - 1] = hit;
+    }
+  }
+  
+  return best_hits;
+}
+
 std::vector<hit> predict_trnas(std::string &dna) {
 
   DnaSequence seq = DnaSequence(dna);
@@ -504,8 +535,30 @@ std::vector<hit> predict_trnas(std::string &dna) {
   int i,j,k,intron,nd1,nd2,ndx,ndh,nc,nch,tfold,tarm;
   int dstem,dloop,tmindist,tmaxdist;
   int ige[7];
-  int *se,*sc,*sb,*si,*tpos,*tend,*apos,*dpos,*tloopfold,*tmv,*cend;
-  int *s1,*s2,*sd,*sf,*sl,*sg1,*sg2,*cposmin,*cposmax,*cpos;
+
+  int *se = NULL;
+  int *sc = NULL;
+  int *sb = NULL;
+  int *si = NULL;
+  int *tpos = NULL;
+  int *tend = NULL;
+  int *apos = NULL;
+  int *dpos = NULL;
+  int *tloopfold = NULL;
+  int *tmv = NULL;
+  int *cend = NULL;
+
+  int *s1 = NULL;
+  int *s2 = NULL;
+  int *sd = NULL;
+  int *sf = NULL;
+  int *sl = NULL;
+  int *sg1 = NULL;
+  int *sg2 = NULL;
+  int *cposmin = NULL;
+  int *cposmax = NULL;
+  int *cpos = NULL;
+
   int r,q,c;
   double e,ec,he,the,energy,cenergy,denergy,ienergy;
   double genergy,energy2,energyf,energyf6;
@@ -603,8 +656,11 @@ std::vector<hit> predict_trnas(std::string &dna) {
        if (the < sw.ttarmthresh) continue;
     }
 
+    int* astem_max_start = tpos - tmaxdist;
+    astem_max_start = astem_max_start < seq.seq ? seq.seq : astem_max_start;
+
     // Look for A-stems in compatible with the current T-loop
-    for(auto & astem5 : find_astem5(tpos-tmaxdist,tpos-tmindist,tend,7,sw))
+    for(auto & astem5 : find_astem5(astem_max_start,tpos-tmindist,tend,7,sw))
     {
       apos = astem5.pos;
 
@@ -974,5 +1030,8 @@ std::vector<hit> predict_trnas(std::string &dna) {
       }
     }
   }
+
+  gs = best_hit(gs);
+
   return(gs);
 }
