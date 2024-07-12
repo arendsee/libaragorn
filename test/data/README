@@ -1,0 +1,26 @@
+# Test Data
+
+All tRNA test data was retrieved from https://trna.ie.niigata-u.ac.jp/. I
+removed the carriage returns on the headers and the comment sections. Here is a
+list of the downloaded sequences:
+
+ * trna_sequence_chloro_1.fasta
+ * trna_sequence_cmp_arc_1.fasta
+ * trna_sequence_cmp_bac_1.fasta
+ * trna_sequence_fungi_1.fasta
+ * trna_sequence_phage_1.fasta
+ * trna_sequence_plant_1.fasta
+ * trna_sequence_plasmid_1.fasta
+ * trna_sequence_virus_1.fasta
+
+For testing purposes, this is a bit too much data, so I downsampled as follows:
+
+``` bash
+for j in trna*fasta
+do
+  awk 'BEGIN{OFS="\t"} NR % 2 == 1 {header=$1} NR % 2 == 0 {print header, $0}' $j | sed 's/ /_/g' |
+    sort -R |
+    head -10000 |
+    awk '{print $1 "\n" $2}' > sample-$j
+done
+```
