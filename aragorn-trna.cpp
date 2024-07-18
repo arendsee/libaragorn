@@ -112,21 +112,28 @@ class Gene {
   }
 };
 
-typedef struct { int *pos;
-                 int stem; // length of the T-stem (4 or 5)
-                 int loop;
-                 double energy; } trna_loop;
+class trna_loop {
+  public:
+    int *pos;
+    int stem; // length of the T-stem (4 or 5)
+    int loop;
+    double energy;
+};
 
-typedef struct { int *pos;
-                 int *end;
-                 int stem;
-                 int loop;
-                 double energy; } trna_dloop;
+class trna_dloop {
+  public:
+    int *pos;
+    int *end;
+    int stem;
+    int loop;
+    double energy;
+};
 
-typedef struct { int *pos1;
-                 int *pos2;
-                 int stem;
-                 double energy; } trna_astem;
+class trna_astem {
+  public:
+    int *pos;
+    double energy;
+};
 
 class Config {
   public:
@@ -267,6 +274,13 @@ trna_loop make_trna_loop(int* pos, int loop, int stem, double energy){
   return(x);
 }
 
+trna_astem make_astem(int* pos, double energy){
+  trna_astem x;
+  x.pos = pos;
+  x.energy = energy;
+  return(x);
+}
+
 
 // find all tstems in the sequence
 std::vector<trna_loop> find_tstems(DnaSequence& seq, Config sw) {
@@ -369,8 +383,8 @@ std::vector<trna_loop> find_tstems(DnaSequence& seq, Config sw) {
 }
 
 
-std::vector<trna_loop> find_astem5(int*seqmax, int *si, int *sl, int *astem3, int n3, Config sw){
-  std::vector<trna_loop> hits;
+std::vector<trna_astem> find_astem5(int*seqmax, int *si, int *sl, int *astem3, int n3, Config sw){
+  std::vector<trna_astem> hits;
   int k;
   int *s1,*s2,*se;
   int r,tascanthresh;
@@ -416,7 +430,7 @@ std::vector<trna_loop> find_astem5(int*seqmax, int *si, int *sl, int *astem3, in
          energy += abem[*s1++][*--s2];
         if (energy >= tastemthresh)
         {
-          hits.push_back(make_trna_loop(si - n3, -1, -1, energy));
+          hits.push_back(make_astem(si - n3, energy));
         }
       }
    }
