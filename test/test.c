@@ -1,4 +1,4 @@
-#include "aragorn-trna.hpp"
+#include "aragorn.hpp"
 #include <vector>
 #include <string>
 #include <fstream>

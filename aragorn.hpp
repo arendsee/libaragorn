@@ -5,19 +5,19 @@
 #include <string>
 
 typedef struct {
-    long start;
-    long stop;
+    int start;
+    int stop;
+    int anticodon;
     int astem1;
-    int astem2;
     int spacer1;
-    int spacer2;
     int dstem;
     int dloop;
+    int spacer2;
+    int astem2;
     int cstem;
     int cloop;
     int intron;
     int nintron;
-    int anticodon;
     int var;
     int varbp;
     int tstem;

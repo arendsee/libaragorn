@@ -31,3 +31,9 @@ echo $(grep -c '>' data/sample-bac-intronic.fa) $(grep -c "seq = " test-bac-intr
 
 ./test data/sample-euk-intronic.fa > test-euk-intronic.txt
 echo $(grep -c '>' data/sample-euk-intronic.fa) $(grep -c "seq = " test-euk-intronic.txt)
+
+# If a file of reference results is given, then compare to current results
+if [[ -d gold ]]
+then
+  for j in test-*; do diff $j gold/$j; done
+fi

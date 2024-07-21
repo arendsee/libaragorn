@@ -1,10 +1,8 @@
-#include "aragorn-trna.hpp"
+#include "aragorn.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
-#include <ostream>
-#include <iostream>
 
 #define INACTIVE        2.0e+35
 
@@ -379,6 +377,7 @@ std::vector<TrnaAstem> find_astem5(const std::vector<int>& seq, int si, int sl, 
   int k;
   int s1, s2, se;
   int r,tascanthresh;
+  int N = (int) seq.size();
   double tastemthresh,energy;
   static int tem[6] = { 0,0,0,0,0,0 };
   static int A[6] = { 0,0,0,2,0,0 };
@@ -397,7 +396,7 @@ std::vector<TrnaAstem> find_astem5(const std::vector<int>& seq, int si, int sl, 
   tastemthresh = sw.tastemthresh;
   sl += n3;
   se = astem3 + n3 - 1;
-  if(se >= seq.size()) return hits;
+  if(se >= N) return hits;
   tem[0] = A[seq[se]];
   tem[1] = C[seq[se]];
   tem[2] = G[seq[se]];
@@ -577,6 +576,8 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
   Gene te = Gene();
   Gene t = Gene();
 
+  int N = (int) seq.size();
+
   tmindist = (MINTRNALEN + sw.minintronlen - MAXTSTEM_DIST);
   tmaxdist = (MAXTRNALEN + sw.maxintronlen - MINTSTEM_DIST);
 
@@ -622,7 +623,7 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
       energyf = dfem[seq[sc+5]][tfold];
 
       sl = sc + sw.sp1max;
-      if (sl >= seq.size()) break;
+      if (sl >= N) break;
 
       while (sc < sl) {
         energy2 = dT[seq[sc - 2]] + RH[seq[sc - 1]] + GC[seq[sc]] + dfem[seq[sc - 2]][seq[sc + 4]];
@@ -630,22 +631,22 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
 
         for (dstem = 3; dstem <= 4; dstem++) {
           sd = sc + dstem;
-          if (sd >= seq.size()) break;
+          if (sd >= N) break;
 
           dloop = 3;
           se = sd + dloop;
-          if (se >= seq.size()) break;
+          if (se >= N) break;
 
           energy = energy2 + 6.0 + dR[seq[se - 1]] + energyf;
           if (dstem == 3)
            if (energyf < 0.0) energyf = energyf6;
           se += dstem;
-          if (se >= seq.size()) break;
+          if (se >= N) break;
 
           s1 = sc;
           s2 = se;
           sf = s1 + dstem;
-          if (sf >= seq.size()) break;
+          if (sf >= N) break;
 
           while (s1 < sf) energy += dbem[seq[s1++]][seq[--s2]];
           if (energy >= sw.tdarmthresh) {
@@ -659,7 +660,7 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
           }
           sg1 = sd + 1;
           sg2 = sd + 6;
-          if (sg2 >= seq.size()) break;
+          if (sg2 >= N) break;
 
           q = GG[seq[sg1++]];
           ige[1] = q & 3;
@@ -675,14 +676,14 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
             while (j <= k) c = c | ige[j++];
             genergy = G3[c];
             se = sd + dloop;
-            if (se >= seq.size()) break;
+            if (se >= N) break;
 
             energy = energy2 + genergy + dR[seq[se-1]] + energyf;
             se += dstem;
             s1 = sc;
             s2 = se;
             sf = s1 + dstem;
-            if (se >= seq.size()) break;
+            if (se >= N) break;
 
             while (s1 < sf) energy += dbem[seq[s1++]][seq[--s2]];
             if (energy >= sw.tdarmthresh) {
@@ -699,13 +700,13 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
         s1 = sc;
         s2 = sc + 16;
         sd = sc + 6;
-        if (s2 >= seq.size()) break;
+        if (s2 >= N) break;
 
         j = bp[seq[s1]][seq[--s2]];
         while (++s1 < sd) j += bp[seq[s1]][seq[--s2]];
         if (j >= 6) {
           energy = dT[seq[sc - 1]] + RH[seq[sc]] + GC[seq[sc + 1]] + energyf6;
-          if ((sd + 1) >= seq.size()) break;
+          if ((sd + 1) >= N) break;
           energy += G[seq[++sd]];
           energy += G[seq[++sd]];
           energy += AGT[seq[++sd]] + dfem[seq[sc - 1]][seq[sc + 4]];
@@ -713,7 +714,7 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
           s1 = sc;
           s2 = sd;
           sf = s1 + 6;
-          if (sf >= seq.size()) break;
+          if (sf >= N) break;
           while (s1 < sf) energy += dbem[seq[s1++]][seq[--s2]];
           if (energy >= sw.tdarmthresh)
            { if (ndh >= ND) goto DFL;
