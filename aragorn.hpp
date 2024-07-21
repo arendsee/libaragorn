@@ -13,7 +13,6 @@ typedef struct {
     int dstem;
     int dloop;
     int spacer2;
-    int astem2;
     int cstem;
     int cloop;
     int intron;
@@ -22,6 +21,7 @@ typedef struct {
     int varbp;
     int tstem;
     int tloop;
+    int astem2;
     double energy;
 } tRNA;
 
