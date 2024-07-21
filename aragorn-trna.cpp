@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <ostream>
+#include <iostream>
 
 #define INACTIVE        2.0e+35
 
@@ -30,44 +32,9 @@
 #define GCBOND      3.0
 
 
-class DnaSequence {
-  public:
-    int* seq;
-    long size;
-
-  DnaSequence(){
-    seq = NULL;
-    size = 0;
-  }
-
-  DnaSequence(std::string &dna){
-    size = dna.size();
-    seq = (int*)malloc(size * sizeof(int));
-    for(int i = 0; i < size; i++){
-      switch(dna[i]) {
-        case 'A':
-          seq[i] = Adenine;
-          break;
-        case 'T':
-          seq[i] = Thymine;
-          break;
-        case 'G':
-          seq[i] = Guanine;
-          break;
-        case 'C':
-          seq[i] = Cytosine;
-          break;
-        default:
-          seq[i] = AMBIG;
-      }
-    }
-  }
-
-};
-
 class Gene {
   public:
-    int *ps;
+    int ps;
     int nbase;
     int start;
     int stop;
@@ -89,7 +56,7 @@ class Gene {
     double energy;
 
   Gene () {
-    ps        = NULL;
+    ps        = 0;
     nbase     = 0;
     start     = 0L;
     stop      = 0L;
@@ -112,26 +79,26 @@ class Gene {
   }
 };
 
-class trna_loop {
+class TrnaLoop {
   public:
-    int *pos;
+    int pos;
     int stem; // length of the T-stem (4 or 5)
     int loop;
     double energy;
 };
 
-class trna_dloop {
+class TrnaDloop {
   public:
-    int *pos;
-    int *end;
+    int pos;
+    int end;
     int stem;
     int loop;
     double energy;
 };
 
-class trna_astem {
+class TrnaAstem {
   public:
-    int *pos;
+    int pos;
     double energy;
 };
 
@@ -203,10 +170,35 @@ double bem[6][6] =
    {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 } };
 
 
+std::vector<int> dna2int (const std::string& dna){
+  std::vector<int> seq(dna.size());
+  for(size_t i = 0; i < dna.size(); i++){
+    switch(dna[i]) {
+      case 'A':
+        seq[i] = Adenine;
+        break;
+      case 'T':
+        seq[i] = Thymine;
+        break;
+      case 'G':
+        seq[i] = Guanine;
+        break;
+      case 'C':
+        seq[i] = Cytosine;
+        break;
+      default:
+        seq[i] = AMBIG;
+    }
+  }
+  return seq;
+}
+
 /* LIBRARY */
 
-double vloop_stability(int *sb, int var, int *varbp){
-  int e,stem,vstem,loop,*sn,*sen,*pos1,*pos2,*se,*sc,*sd,*sf,*s;
+// mutates varbp
+double vloop_stability(const std::vector<int>& seq, int sb, int var, int &varbp){
+  int e,stem,vstem,loop;
+  int sn, sen, pos1, pos2, se, sc, sd, sf, s;
   int c,cn,m;
   static int A[6] = { 0,0,0x100,0x400,0,0 };
   static int C[6] = { 0,0,0x400,0,0,0 };
@@ -217,34 +209,34 @@ double vloop_stability(int *sb, int var, int *varbp){
   sc = sb + 3;
   se = sb + var - 2;
   sf = se - 2;
-  te[0] = A[*se];
-  te[1] = C[*se];
-  te[2] = G[*se];
-  te[3] = T[*se];
+  te[0] = A[seq[se]];
+  te[1] = C[seq[se]];
+  te[2] = G[seq[se]];
+  te[3] = T[seq[se]];
   while (--se > sf)
-   { te[0] = (te[0] >> 4) | A[*se];
-     te[1] = (te[1] >> 4) | C[*se];
-     te[2] = (te[2] >> 4) | G[*se];
-     te[3] = (te[3] >> 4) | T[*se]; }
+   { te[0] = (te[0] >> 4) | A[seq[se]];
+     te[1] = (te[1] >> 4) | C[seq[se]];
+     te[2] = (te[2] >> 4) | G[seq[se]];
+     te[3] = (te[3] >> 4) | T[seq[se]]; }
   while (se >= sc)
-   { te[0] = ((te[0] >> 4) | A[*se]);
-     te[1] = ((te[1] >> 4) | C[*se]);
-     te[2] = ((te[2] >> 4) | G[*se]);
-     te[3] = ((te[3] >> 4) | T[*se]);
+   { te[0] = ((te[0] >> 4) | A[seq[se]]);
+     te[1] = ((te[1] >> 4) | C[seq[se]]);
+     te[2] = ((te[2] >> 4) | G[seq[se]]);
+     te[3] = ((te[3] >> 4) | T[seq[se]]);
      s = se - 5;
      sd = se - 7;
-     m = te[*s];
-     while (--s > sd) m = (m >> 4) + te[*s];
+     m = te[seq[s]];
+     while (--s > sd) m = (m >> 4) + te[seq[s]];
      while (s >= sb)
-       {  m = (m >> 4) + te[*s];
+       {  m = (m >> 4) + te[seq[s]];
           c = m & 0xf;
           if (c >= 9)
            { stem = 3;
-             loop = (int)(se - s) - 3;
+             loop = se - s - 3;
              sen = se;
              sn = s + 2;
              while (loop >= 6)
-              { if ((cn = vbp[sen[-1]][sn[1]]) <= 0) break;
+              { if ((cn = vbp[seq[sen - 1]][seq[sn + 1]]) <= 0) break;
                 c += cn;
                 stem++;
                 loop -= 2;
@@ -257,16 +249,18 @@ double vloop_stability(int *sb, int var, int *varbp){
                 vstem = stem; }}
           s--; }
       se--; }
-  if (e > 0)
-   { *varbp = (((int)(pos1-sb))<<10) + (((int)(pos2-sb))<<5) + vstem;
-     return((double)(3*(vstem - 4))); }
-  else
-   { *varbp = 0;
-     return(-12.0); }}
+  if (e > 0) {
+    varbp = ((pos1 - sb) << 10) + ((pos2 - sb) << 5) + vstem;
+    return((double)(3*(vstem - 4)));
+  } else {
+     varbp = 0;
+     return(-12.0);
+  }
+}
 
 
-trna_loop make_trna_loop(int* pos, int loop, int stem, double energy){
-  trna_loop x;
+TrnaLoop make_trna_loop(int pos, int loop, int stem, double energy){
+  TrnaLoop x;
   x.pos = pos;
   x.loop = loop;
   x.stem = stem;
@@ -274,8 +268,8 @@ trna_loop make_trna_loop(int* pos, int loop, int stem, double energy){
   return(x);
 }
 
-trna_astem make_astem(int* pos, double energy){
-  trna_astem x;
+TrnaAstem make_astem(int pos, double energy){
+  TrnaAstem x;
   x.pos = pos;
   x.energy = energy;
   return(x);
@@ -283,14 +277,11 @@ trna_astem make_astem(int* pos, double energy){
 
 
 // find all tstems in the sequence
-std::vector<trna_loop> find_tstems(DnaSequence& seq, Config sw) {
-  std::vector<trna_loop> hits;
-
-  int *s = seq.seq;
-  int ls = seq.size;
+std::vector<TrnaLoop> find_tstems(const std::vector<int>& s, const Config& sw) {
+  std::vector<TrnaLoop> hits;
 
   int r,c,tstem,tloop;
-  int *s1,*s2,*se,*ss,*si,*sb,*sc,*sf,*sl,*sx;
+  int s1, s2, se, ss, si, sb, sc, sf, sl, sx;
   double ec,energy,penalty;
   static double bem[6][6] = {
   //    A        C       G       T
@@ -309,7 +300,7 @@ std::vector<trna_loop> find_tstems(DnaSequence& seq, Config sw) {
   static int tem[6]  = { 0x0100, 0x0002, 0x2000, 0x0220, 0x0000, 0x0000 };
 
   // left starting position after applying offset
-  ss = s + sw.loffset;
+  ss = sw.loffset;
 
   // pointer to the moving t-start?
   // And 4 - 1 because???
@@ -317,15 +308,15 @@ std::vector<trna_loop> find_tstems(DnaSequence& seq, Config sw) {
 
   // right ending position after applying offset
   // And 5 + 3 because???
-  sl = s + ls - sw.roffset + 5 + 3;
+  sl = s.size() - sw.roffset + 5 + 3;
 
   // initialize the scanning bit pattern with the first three bases
-  r = tem[*si++];
-  r = (r >> 4) + tem[*si++];
-  r = (r >> 4) + tem[*si++];
+  r = tem[s[si++]];
+  r = (r >> 4) + tem[s[si++]];
+  r = (r >> 4) + tem[s[si++]];
 
   while (si < sl) {
-    r = (r >> 4) + tem[*si++];
+    r = (r >> 4) + tem[s[si++]];
 
     // The `r & 0xF` trick gets the rightmost byte from r
     // The 4th byte contains information about the 4 prior bytes
@@ -365,9 +356,9 @@ std::vector<trna_loop> find_tstems(DnaSequence& seq, Config sw) {
           s1 = sb;
           s2 = sc;
           se = s1 + tstem;
-          energy = ec + bem[*se][se[4]] + bem[*s1++][*--s2] - penalty;
-          while (s1 < se) energy += bem[*s1++][*--s2];
-          energy += G[*sx] + A[sx[1]] + T[sx[3]] + C[sx[4]] + C[sx[5]];
+          energy = ec + bem[s[se]][s[se + 4]] + bem[s[s1++]][s[--s2]] - penalty;
+          while (s1 < se) energy += bem[s[s1++]][s[--s2]];
+          energy += G[s[sx]] + A[s[sx + 1]] + T[s[sx + 3]] + C[s[sx + 4]] + C[s[sx + 5]];
           if (energy >= sw.ttarmthresh) {
              hits.push_back(make_trna_loop(sb, tloop, tstem, energy));
           }
@@ -383,10 +374,10 @@ std::vector<trna_loop> find_tstems(DnaSequence& seq, Config sw) {
 }
 
 
-std::vector<trna_astem> find_astem5(int*seqmax, int *si, int *sl, int *astem3, int n3, Config sw){
-  std::vector<trna_astem> hits;
+std::vector<TrnaAstem> find_astem5(const std::vector<int>& seq, int si, int sl, int astem3, int n3, const Config& sw){
+  std::vector<TrnaAstem> hits;
   int k;
-  int *s1,*s2,*se;
+  int s1, s2, se;
   int r,tascanthresh;
   double tastemthresh,energy;
   static int tem[6] = { 0,0,0,0,0,0 };
@@ -406,28 +397,28 @@ std::vector<trna_astem> find_astem5(int*seqmax, int *si, int *sl, int *astem3, i
   tastemthresh = sw.tastemthresh;
   sl += n3;
   se = astem3 + n3 - 1;
-  if(se > seqmax) return hits;
-  tem[0] = A[*se];
-  tem[1] = C[*se];
-  tem[2] = G[*se];
-  tem[3] = T[*se];
+  if(se >= seq.size()) return hits;
+  tem[0] = A[seq[se]];
+  tem[1] = C[seq[se]];
+  tem[2] = G[seq[se]];
+  tem[3] = T[seq[se]];
   while (--se >= astem3)
-   { tem[0] = (tem[0] << 4) + A[*se];
-     tem[1] = (tem[1] << 4) + C[*se];
-     tem[2] = (tem[2] << 4) + G[*se];
-     tem[3] = (tem[3] << 4) + T[*se]; }
-  r = tem[*si++];
+   { tem[0] = (tem[0] << 4) + A[seq[se]];
+     tem[1] = (tem[1] << 4) + C[seq[se]];
+     tem[2] = (tem[2] << 4) + G[seq[se]];
+     tem[3] = (tem[3] << 4) + T[seq[se]]; }
+  r = tem[seq[si++]];
   k = 1;
-  while (++k < n3) r = (r >> 4) + tem[*si++];
+  while (++k < n3) r = (r >> 4) + tem[seq[si++]];
   while (si < sl)
-   { r = (r >> 4) + tem[*si++];
+   { r = (r >> 4) + tem[seq[si++]];
      if ((r & 15) >= tascanthresh)
       { s1 = astem3;
         s2 = si;
         se = s1 + n3;
-        energy = abem[*s1++][*--s2];
+        energy = abem[seq[s1++]][seq[--s2]];
         while (s1 < se)
-         energy += abem[*s1++][*--s2];
+         energy += abem[seq[s1++]][seq[--s2]];
         if (energy >= tastemthresh)
         {
           hits.push_back(make_astem(si - n3, energy));
@@ -437,12 +428,12 @@ std::vector<trna_astem> find_astem5(int*seqmax, int *si, int *sl, int *astem3, i
   return(hits); }
 
 
-void ti_genedetected(int *seq, Gene& te, Config& sw) {
+void ti_genedetected(Gene& te, const Config& sw) {
   te.nbase = te.astem1 + te.spacer1 + te.spacer2 + 2*te.dstem +
               te.dloop +  2*te.cstem + te.cloop +
               te.var + 2*te.tstem + te.tloop + te.astem2;
-  te.start = te.ps - seq;
-  te.stop = te.ps - seq + te.nbase; }
+  te.start = te.ps;
+  te.stop = te.ps + te.nbase; }
 
 tRNA make_trna(Gene &g){
     tRNA h;
@@ -504,34 +495,14 @@ std::vector<T> best_hit(std::vector<T> hits) {
 
 std::vector<tRNA> predict_trnas(std::string &dna) {
 
-  DnaSequence seq = DnaSequence(dna);
+  std::vector<int> seq = dna2int(dna);
 
   int i,j,k,intron,nd1,nd2,ndx,ndh,nc,nch,tfold,tarm;
   int dstem,dloop,tmindist,tmaxdist;
   int ige[7];
 
-  int *se = NULL;
-  int *sc = NULL;
-  int *sb = NULL;
-  int *si = NULL;
-  int *tpos = NULL;
-  int *tend = NULL;
-  int *apos = NULL;
-  int *dpos = NULL;
-  int *tloopfold = NULL;
-  int *tmv = NULL;
-  int *cend = NULL;
-
-  int *s1 = NULL;
-  int *s2 = NULL;
-  int *sd = NULL;
-  int *sf = NULL;
-  int *sl = NULL;
-  int *sg1 = NULL;
-  int *sg2 = NULL;
-  int *cposmin = NULL;
-  int *cposmax = NULL;
-  int *cpos = NULL;
+  int se, sc, sb, si, tpos, tend, apos, dpos, tloopfold, tmv, cend;
+  int s1, s2, sd, sf, sl, sg1, sg2, cposmin, cposmax, cpos;
 
   int r,q,c;
   double e,ec,he,the,energy,cenergy,denergy,ienergy;
@@ -598,16 +569,13 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
      {  0.000,       0.000,       0.000,       0.000,      0.000, 0.000 },
      {  0.000,       0.000,       0.000,       0.000,      0.000, 0.000 } };
 
-  trna_loop chit[NC];
-  trna_dloop dhit[ND];
+  TrnaLoop chit[NC];
+  TrnaDloop dhit[ND];
 
   static Config sw = Config();
 
   Gene te = Gene();
   Gene t = Gene();
-
-  int* seqmax = seq.seq + seq.size - 1;
-  // int* seqmin = seq.seq;
 
   tmindist = (MINTRNALEN + sw.minintronlen - MAXTSTEM_DIST);
   tmaxdist = (MAXTRNALEN + sw.maxintronlen - MINTSTEM_DIST);
@@ -618,7 +586,7 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
     tpos = tloop.pos;
     t.tloop = tloop.loop;
     t.tstem = tloop.stem;
-    tfold = tpos[-1];
+    tfold = seq[tpos - 1];
     tloopfold = tpos + t.tstem + 1;
     tarm = 2*t.tstem + t.tloop;
     tend = tpos + tarm;
@@ -629,15 +597,15 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
 
     // abort if the observed T-loop is too low confidence
     if (sw.threshlevel < 1.0) {
-       the -= (G[tpos[t.tstem]] + G[tpos[t.tstem+1]]);
+       the -= (G[seq[tpos + t.tstem]] + G[seq[tpos + t.tstem + 1]]);
        if (the < sw.ttarmthresh) continue;
     }
 
-    int* astem_max_start = tpos - tmaxdist;
-    astem_max_start = astem_max_start < seq.seq ? seq.seq : astem_max_start;
+    int astem_max_start = tpos - tmaxdist;
+    astem_max_start = astem_max_start < 0 ? 0 : astem_max_start;
 
     // Look for A-stems in compatible with the current T-loop
-    for(auto & astem5 : find_astem5(seqmax, astem_max_start,tpos-tmindist,tend,7,sw))
+    for(auto & astem5 : find_astem5(seq, astem_max_start, tpos-tmindist, tend, 7, sw))
     {
 
       apos = astem5.pos;
@@ -651,34 +619,35 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
      
       ndh = 0;
       sc = apos + 8;
-      energyf = dfem[sc[5]][tfold];
+      energyf = dfem[seq[sc+5]][tfold];
 
       sl = sc + sw.sp1max;
-      if (sl > seqmax) break;
+      if (sl >= seq.size()) break;
 
       while (sc < sl) {
-        energy2 = dT[sc[-2]] + RH[*(sc-1)] + GC[*sc] + dfem[sc[-2]][sc[4]];
-        energyf6 = dfem[sc[6]][tfold];
+        energy2 = dT[seq[sc - 2]] + RH[seq[sc - 1]] + GC[seq[sc]] + dfem[seq[sc - 2]][seq[sc + 4]];
+        energyf6 = dfem[seq[sc+6]][tfold];
+
         for (dstem = 3; dstem <= 4; dstem++) {
           sd = sc + dstem;
-          if (sd > seqmax) break;
+          if (sd >= seq.size()) break;
 
           dloop = 3;
           se = sd + dloop;
-          if (se > seqmax) break;
+          if (se >= seq.size()) break;
 
-          energy = energy2 + 6.0 + dR[*(se-1)] + energyf;
+          energy = energy2 + 6.0 + dR[seq[se - 1]] + energyf;
           if (dstem == 3)
            if (energyf < 0.0) energyf = energyf6;
           se += dstem;
-          if (se > seqmax) break;
+          if (se >= seq.size()) break;
 
           s1 = sc;
           s2 = se;
           sf = s1 + dstem;
-          if (sf > seqmax) break;
+          if (sf >= seq.size()) break;
 
-          while (s1 < sf) energy += dbem[*s1++][*--s2];
+          while (s1 < sf) energy += dbem[seq[s1++]][seq[--s2]];
           if (energy >= sw.tdarmthresh) {
             if (ndh >= ND) goto DFL;
             dhit[ndh].pos = sc;
@@ -690,13 +659,13 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
           }
           sg1 = sd + 1;
           sg2 = sd + 6;
-          if (sg2 > seqmax) break;
+          if (sg2 >= seq.size()) break;
 
-          q = GG[*sg1++];
+          q = GG[seq[sg1++]];
           ige[1] = q & 3;
           j = 2;
           while (sg1 <= sg2) {
-             q = (q >> 4) + GG[*sg1++];
+             q = (q >> 4) + GG[seq[sg1++]];
              ige[j++] = q & 3;
           }
           for (dloop = 4; dloop <= 11; dloop++) {
@@ -706,16 +675,16 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
             while (j <= k) c = c | ige[j++];
             genergy = G3[c];
             se = sd + dloop;
-            if (se > seqmax) break;
+            if (se >= seq.size()) break;
 
-            energy = energy2 + genergy + dR[*(se-1)] + energyf;
+            energy = energy2 + genergy + dR[seq[se-1]] + energyf;
             se += dstem;
             s1 = sc;
             s2 = se;
             sf = s1 + dstem;
-            if (se > seqmax) break;
+            if (se >= seq.size()) break;
 
-            while (s1 < sf) energy += dbem[*s1++][*--s2];
+            while (s1 < sf) energy += dbem[seq[s1++]][seq[--s2]];
             if (energy >= sw.tdarmthresh) {
                if (ndh >= ND) goto DFL;
                dhit[ndh].pos = sc;
@@ -730,22 +699,22 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
         s1 = sc;
         s2 = sc + 16;
         sd = sc + 6;
-        if (s2 > seqmax) break;
+        if (s2 >= seq.size()) break;
 
-        j = bp[*s1][*--s2];
-        while (++s1 < sd) j += bp[*s1][*--s2];
+        j = bp[seq[s1]][seq[--s2]];
+        while (++s1 < sd) j += bp[seq[s1]][seq[--s2]];
         if (j >= 6) {
-          energy = dT[sc[-1]] + RH[*sc] + GC[*(sc+1)] + energyf6;
-          if ((sd + 1) > seqmax) break;
-          energy += G[*++sd];
-          energy += G[*++sd];
-          energy += AGT[*++sd] + dfem[sc[-1]][sc[4]];
+          energy = dT[seq[sc - 1]] + RH[seq[sc]] + GC[seq[sc + 1]] + energyf6;
+          if ((sd + 1) >= seq.size()) break;
+          energy += G[seq[++sd]];
+          energy += G[seq[++sd]];
+          energy += AGT[seq[++sd]] + dfem[seq[sc - 1]][seq[sc + 4]];
           sd += 7;
           s1 = sc;
           s2 = sd;
           sf = s1 + 6;
-          if (sf > seqmax) break;
-          while (s1 < sf) energy += dbem[*s1++][*--s2];
+          if (sf >= seq.size()) break;
+          while (s1 < sf) energy += dbem[seq[s1++]][seq[--s2]];
           if (energy >= sw.tdarmthresh)
            { if (ndh >= ND) goto DFL;
              dhit[ndh].pos = sc;
@@ -758,18 +727,18 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
         s1 = sc;
         s2 = sc + 18;
         sd = sc + 7;
-        j = bp[*s1][*--s2];
-        while (++s1 < sd) j += bp[*s1][*--s2];
+        j = bp[seq[s1]][seq[--s2]];
+        while (++s1 < sd) j += bp[seq[s1]][seq[--s2]];
         if (j >= 7) {
-          energy = energy2 + dfem[sc[7]][tfold];
-          energy += G[*++sd];
-          energy += G[*++sd];
-          energy += AGT[*++sd];
+          energy = energy2 + dfem[seq[sc+7]][tfold];
+          energy += G[seq[++sd]];
+          energy += G[seq[++sd]];
+          energy += AGT[seq[++sd]];
           sd += 8;
           s1 = sc;
           s2 = sd;
           sf = s1 + 7;
-          while (s1 < sf) energy += dbem[*s1++][*--s2];
+          while (s1 < sf) energy += dbem[seq[s1++]][seq[--s2]];
           if (energy >= sw.tdarmthresh)
            { if (ndh >= ND) goto DFL;
              dhit[ndh].pos = sc;
@@ -796,19 +765,21 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
          dpos = dhit[nd1].pos;
          if ((int)(dpos - apos) < 9)
            dhit[nd1].energy -= 3.0;
-         if (*tloopfold == Guanine)
+         if (seq[tloopfold] == Guanine)
           { sb = dpos + dstem + 2;
             sc = sb;
             se = sb + dhit[nd1].loop - 3;
-            r = TT[*sb++];
-            while (sb < se)
-             { r = (r >> 4) + TT[*sb++];
-               if (r & 2)
-                { dhit[nd1].energy += 10.0;
-                  break; }}
-            r = GG[*sc++];
+            r = TT[seq[sb++]];
+            while (sb < se) {
+              r = (r >> 4) + TT[seq[sb++]];
+              if (r & 2) {
+                 dhit[nd1].energy += 10.0;
+                 break;
+              }
+            }
+            r = GG[seq[sc++]];
             while (sc < se)
-             { r = (r >> 4) + GG[*sc++];
+             { r = (r >> 4) + GG[seq[sc++]];
                if (r & 2)
                { dhit[nd1].energy -= 12.0;
                  break; }}}
@@ -825,7 +796,7 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
           e = dhit[nd2].energy;
           if (e > denergy) {
             denergy = e;
-            dhit[ndx].end = NULL;
+            dhit[ndx].end = 0;
             ndx = nd2;
           }
         }
@@ -868,26 +839,26 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
         si = cpos;
         sc = cpos + 5;
         se = cpos + 4;
-        ct[0] = cA[*se];
-        ct[1] = cC[*se];
-        ct[2] = cG[*se];
-        ct[3] = cT[*se];
+        ct[0] = cA[seq[se]];
+        ct[1] = cC[seq[se]];
+        ct[2] = cG[seq[se]];
+        ct[3] = cT[seq[se]];
      
         while (--se >= cpos) {
-          ct[0] = (ct[0] << 4) + cA[*se];
-          ct[1] = (ct[1] << 4) + cC[*se];
-          ct[2] = (ct[2] << 4) + cG[*se];
-          ct[3] = (ct[3] << 4) + cT[*se];
+          ct[0] = (ct[0] << 4) + cA[seq[se]];
+          ct[1] = (ct[1] << 4) + cC[seq[se]];
+          ct[2] = (ct[2] << 4) + cG[seq[se]];
+          ct[3] = (ct[3] << 4) + cT[seq[se]];
         }
         si += 11;
         se = tmv - VARDIFF - 5;
         if (si < se) si = se;
-        r = ct[*si++];
-        r = (r >> 4) + ct[*si++];
-        r = (r >> 4) + ct[*si++];
-        r = (r >> 4) + ct[*si++];
+        r = ct[seq[si++]];
+        r = (r >> 4) + ct[seq[si++]];
+        r = (r >> 4) + ct[seq[si++]];
+        r = (r >> 4) + ct[seq[si++]];
         while (si < tmv) {
-          r = (r >> 4) + ct[*si++];
+          r = (r >> 4) + ct[seq[si++]];
           if ((r & 0xf) >= 5) {
             if (nch >= NC) { fprintf(stderr,"Too many cstem hits\n");
                goto FN;
@@ -896,18 +867,18 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
             chit[nch].stem = 5;
             chit[nch].loop = (int)(si - sc - 5);
             if (chit[nch].loop == 9)
-             if (bp[*sc][si[-6]])
-              if (cY[sc[2]])
-               if (cR[sc[6]])
-                if (cY[sc[1]])
+             if (bp[seq[sc]][seq[si - 6]])
+              if (cY[seq[sc+2]])
+               if (cR[seq[sc+6]])
+                if (cY[seq[sc+1]])
                  { chit[nch].stem = 6;
                    chit[nch].loop = 7; }
             s1 = cpos;
             s2 = si;
             se = s1 + chit[nch].stem;
-            chit[nch].energy = cbem[*s1++][*--s2];
+            chit[nch].energy = cbem[seq[s1++]][seq[--s2]];
             while (s1  < se)
-             chit[nch].energy += cbem[*s1++][*--s2];
+             chit[nch].energy += cbem[seq[s1++]][seq[--s2]];
             nch++; 
           }
         }
@@ -930,28 +901,28 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
               continue;
             }
             t.nintron = 0;
-            if (t.var > 17) energy += vloop_stability(cend,t.var,&t.varbp);
+            if (t.var > 17) energy += vloop_stability(seq, cend, t.var, t.varbp);
             sb = cpos + t.cstem;
-            energy += T[*(sb + 1)] + Y[*(sb)] + R[*(sb + 5)] - 0.05*t.var - ((t.cloop == 7)?0.0:6.0);
+            energy += T[seq[sb + 1]] + Y[seq[sb]] + R[seq[sb + 5]] - 0.05*t.var - ((t.cloop == 7)?0.0:6.0);
           } else {
             t.nintron = t.cloop - 7;
             if (t.nintron > sw.maxintronlen) continue;
             if (t.nintron < sw.minintronlen) continue;
-            if (t.var > 17) energy += vloop_stability(cend,t.var,&t.varbp);
+            if (t.var > 17) energy += vloop_stability(seq, cend, t.var, t.varbp);
             if (energy < (te.energy - 9.0)) continue;
             t.cloop = 7;
             sb = cpos + t.cstem;
             se = sb + t.nintron;
             if (sw.ifixedpos) {
               intron = 6;
-              cenergy = YP[*sb] + T[sb[1]] + RP[sb[5]];
+              cenergy = YP[seq[sb]] + T[seq[sb+1]] + RP[seq[sb+5]];
             } else {
-              cenergy = YP[*se] + T[*(se+1)] + RP[*(se+5)];
-              ienergy = cenergy + RI[*sb] + GI[*(se-1)] + AI[se[-2]]*YI[se[-1]];
+              cenergy = YP[seq[se]] + T[seq[se+1]] + RP[seq[se+5]];
+              ienergy = cenergy + RI[seq[sb]] + GI[seq[se-1]] + AI[seq[se - 2]]*YI[seq[se - 1]];
               for (j = 1; j <= 7; j++) {
                 si = se + j - 1;
-                ec = YP[*(sb + yic[j]*t.nintron)] + T[*(sb + tic[j]*t.nintron + 1)] + RP[*(sb + ric[j]*t.nintron + 5)];
-                e = ec + RI[*(sb + j)] + GI[*si] + AI[si[-1]]*YI[*si];
+                ec = YP[seq[sb + yic[j]*t.nintron]] + T[seq[sb + tic[j]*t.nintron + 1]] + RP[seq[sb + ric[j]*t.nintron + 5]];
+                e = ec + RI[seq[sb + j]] + GI[seq[si]] + AI[seq[si - 1]]*YI[seq[si]];
                 if (j == 6) e += 0.01;
                 if (e > ienergy) {
                   ienergy = e;
@@ -963,9 +934,9 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
             energy +=  cenergy - 10.0 - ilw*(t.nintron  + 1.1*t.var);
             if (t.nintron >= 130) {
               si = se + intron;
-              j = si[-1];
+              j = seq[si - 1];
               if (j != Guanine) {
-                 if (si[-2] != Adenine) energy -= 4.0;
+                 if (seq[si - 2] != Adenine) energy -= 4.0;
                    if (j != Cytosine)
                      if (j != Thymine)
                        energy -= 8.0;
@@ -976,17 +947,17 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
           dstem = dhit[ndx].stem;
           dpos = dhit[ndx].pos;
           if (dstem >= 6) {
-            if (sb[2 + a1ic[intron]*t.nintron] != Thymine) continue;
-            if (sb[3 + a2ic[intron]*t.nintron] != Cytosine) continue;
-            if (sb[4 + a3ic[intron]*t.nintron] != Adenine) continue;
+            if (seq[sb + 2 + a1ic[intron] * t.nintron] != Thymine) continue;
+            if (seq[sb + 3 + a2ic[intron] * t.nintron] != Cytosine) continue;
+            if (seq[sb + 4 + a3ic[intron] * t.nintron] != Adenine) continue;
             energy += 3.0;
           } else {
-            if (!(dpos[-1] & 5)) {
+            if (!(seq[dpos - 1] & 5)) {
                i = 0;
                si = cend;
                se = cend + 4;
                while (si < se)
-                { if (!(*si++ & 5))
+                { if (!(seq[si++] & 5))
                    { if (++i >= 2)
                       { energy += 3.0;
                         break; }}
@@ -995,9 +966,9 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
             }
           }
           if (t.cstem >= 6) {
-            if (sb[2 + a1ic[intron]*t.nintron] == Cytosine)
-             if (sb[3 + a2ic[intron]*t.nintron] == Thymine)
-              if (sb[4 + a3ic[intron]*t.nintron] == Adenine)
+            if (seq[sb + 2 + a1ic[intron]*t.nintron] == Cytosine)
+             if (seq[sb + 3 + a2ic[intron]*t.nintron] == Thymine)
+              if (seq[sb + 4 + a3ic[intron]*t.nintron] == Adenine)
                energy += 4.0;
           }
           if (energy < sw.trnathresh) continue;
@@ -1012,24 +983,24 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
           // astem2 length is always just set to the length of astem1
           t.astem2 = t.astem1;
           t.ps = apos + 7 - t.astem1;
-          t.nbase = (int)(tend - t.ps) + t.astem2;
+          t.nbase = tend - t.ps + t.astem2;
           t.dloop = dhit[ndx].loop;
-          t.spacer1 = (int)(dpos - apos) - 7;
-          t.spacer2 = (int)(cpos - dhit[ndx].end);
-          j = (int)(cpos - t.ps) + t.cstem;
+          t.spacer1 = dpos - apos - 7;
+          t.spacer2 = cpos - dhit[ndx].end;
+          j = cpos - t.ps + t.cstem;
           t.anticodon = j + 2;
 
           if (t.nintron > 0) {
             t.intron = j + intron;
             if ((t.nbase + t.nintron) > MAXTRNALEN) {
-              ti_genedetected(seq.seq,t,sw);
+              ti_genedetected(t,sw);
               gs.push_back(make_trna(t));
               continue;
             }
           }
           if (energy < te.energy) continue;
           te = t;
-          ti_genedetected(seq.seq,t,sw);
+          ti_genedetected(t,sw);
           gs.push_back(make_trna(t));
         }
       }
