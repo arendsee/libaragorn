@@ -48,7 +48,6 @@ class Gene {
     int nintron;
     int anticodon;
     int var;
-    int varbp;
     int tstem;
     int tloop;
     double energy;
@@ -70,7 +69,6 @@ class Gene {
     nintron   = 0;
     anticodon = 0;
     var       = 15;
-    varbp     = 0;
     tstem     = 5;
     tloop     = 7;
     energy    = 0.0;
@@ -193,10 +191,9 @@ std::vector<int> dna2int (const std::string& dna){
 
 /* LIBRARY */
 
-// mutates varbp
-double vloop_stability(const std::vector<int>& seq, int sb, int var, int &varbp){
+double vloop_stability(const std::vector<int>& seq, int sb, int var){
   int e,stem,vstem,loop;
-  int sn, sen, pos1, pos2, se, sc, sd, sf, s;
+  int sn, sen, se, sc, sd, sf, s;
   int c,cn,m;
   static int A[6] = { 0,0,0x100,0x400,0,0 };
   static int C[6] = { 0,0,0x400,0,0,0 };
@@ -242,16 +239,12 @@ double vloop_stability(const std::vector<int>& seq, int sb, int var, int &varbp)
                 sn++; }
              if (c > e)
               { e = c;
-                pos1 = s;
-                pos2 = sen;
                 vstem = stem; }}
           s--; }
       se--; }
   if (e > 0) {
-    varbp = ((pos1 - sb) << 10) + ((pos2 - sb) << 5) + vstem;
     return((double)(3*(vstem - 4)));
   } else {
-     varbp = 0;
      return(-12.0);
   }
 }
@@ -450,7 +443,6 @@ tRNA make_trna(Gene &g){
     h.nintron = g.nintron;
     h.anticodon = g.anticodon;
     h.var = g.var;
-    h.varbp = g.varbp;
     h.tstem = g.tstem;
     h.tloop = g.tloop;
     h.energy = g.energy;
@@ -902,14 +894,14 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
               continue;
             }
             t.nintron = 0;
-            if (t.var > 17) energy += vloop_stability(seq, cend, t.var, t.varbp);
+            if (t.var > 17) energy += vloop_stability(seq, cend, t.var);
             sb = cpos + t.cstem;
             energy += T[seq[sb + 1]] + Y[seq[sb]] + R[seq[sb + 5]] - 0.05*t.var - ((t.cloop == 7)?0.0:6.0);
           } else {
             t.nintron = t.cloop - 7;
             if (t.nintron > sw.maxintronlen) continue;
             if (t.nintron < sw.minintronlen) continue;
-            if (t.var > 17) energy += vloop_stability(seq, cend, t.var, t.varbp);
+            if (t.var > 17) energy += vloop_stability(seq, cend, t.var);
             if (energy < (te.energy - 9.0)) continue;
             t.cloop = 7;
             sb = cpos + t.cstem;

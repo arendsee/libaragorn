@@ -18,7 +18,6 @@ typedef struct {
     int intron;
     int nintron;
     int var;
-    int varbp;
     int tstem;
     int tloop;
     int astem2;

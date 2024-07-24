@@ -122,7 +122,8 @@ aaGCGGAGTTAGTTTAGTCTGGTATGACGTCAGCTTCCCAAGCTGAAGGCCGCGGGTTCAAATCCCGCACTCCGCAt
   -------                                                           -------
   CGCCTCA
 
-                         a
+                            cca   3' amino-acyl acceptor
+                    5'    a       NCCA is the canonical motif
                        g-c
                        c-g
                        g-c  A-stem
@@ -142,8 +143,10 @@ aaGCGGAGTTAGTTTAGTCTGGTATGACGTCAGCTTCCCAAGCTGAAGGCCGCGGGTTCAAATCCCGCACTCCGCAt
                       g-c
                       c-g
                      t   a
-                     t   a   C-loop
+                     t   a   C-loop (anticodon stem-loop)
                       ccc
+                      \ /
+                       anticodon
 
 
 [agt]cca
@@ -186,6 +189,5 @@ astem2 = 8
 intron = 0
 nintron = 0
 anticodon = 35
-varbp = 0
 energy = 157.108
 */
