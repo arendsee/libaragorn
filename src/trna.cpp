@@ -439,13 +439,13 @@ tRNA make_trna(Gene &g){
     h.dloop = g.dloop;
     h.cstem = g.cstem;
     h.cloop = g.cloop;
-    h.intron = g.intron;
-    h.nintron = g.nintron;
+    h.intron_start = g.intron;
+    h.intron_length = g.nintron;
     h.anticodon = g.anticodon;
     h.var = g.var;
     h.tstem = g.tstem;
     h.tloop = g.tloop;
-    h.energy = g.energy;
+    h.score = g.energy;
     return h;
 }
 
@@ -476,7 +476,7 @@ std::vector<T> best_hit(std::vector<T> hits) {
     last = best_hits[best_hits.size() - 1];
     if (hit.start > last.stop) {
       best_hits.push_back(hit);
-    } else if (hit.energy > last.energy) {
+    } else if (hit.score > last.score) {
       best_hits[best_hits.size() - 1] = hit;
     }
   }

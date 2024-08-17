@@ -91,9 +91,9 @@ int main(int z, char *v[]) {
                 << "start = " << hits[j].start << std::endl
                 << "stop = " << hits[j].stop << std::endl
                 << "length = (" << component_length << "," << hits[j].stop - hits[j].start << ")" << std::endl
-                << "intron = " << hits[j].intron << std::endl
-                << "nintron = " << hits[j].nintron << std::endl
-                << "energy = " << hits[j].energy << std::endl
+                << "intron = " << hits[j].intron_start << std::endl
+                << "nintron = " << hits[j].intron_length << std::endl
+                << "energy = " << hits[j].score << std::endl
                 << "----------------------------" << std::endl
                 << "astem1 = " << hits[j].astem1 << std::endl
                 << "spacer1 = " << hits[j].spacer1 << std::endl

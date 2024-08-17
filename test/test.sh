@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-make
-
 ./test data/sample-trna_sequence_cmp_arc_1.fasta > test-trna_sequence_cmp_arc_1.txt
 echo $(grep -c '>' data/sample-trna_sequence_cmp_arc_1.fasta) $(grep -c "seq = " test-trna_sequence_cmp_arc_1.txt)
 

@@ -8,7 +8,7 @@ typedef struct {
     int start;
     int stop;
     int anticodon;
-    double energy;
+    double score;
     int astem1;
     int spacer1;
     int dstem;
@@ -16,8 +16,8 @@ typedef struct {
     int spacer2;
     int cstem;
     int cloop;
-    int intron;
-    int nintron;
+    int intron_start;
+    int intron_length;
     int var;
     int tstem;
     int tloop;
@@ -25,5 +25,7 @@ typedef struct {
 } tRNA;
 
 std::vector<tRNA> predict_trnas(std::string &dna);
+
+std::vector<tRNA> predict_mtrnas(std::string &dna);
 
 #endif
