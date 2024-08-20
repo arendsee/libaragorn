@@ -33,7 +33,7 @@ echo $(grep -c '>' data/sample-euk-intronic.fa) $(grep -c "seq = " test-euk-intr
 
 echo "Testing mtRNA"
 
-./test data/rat-mito.fna mtRNA > z
+./test data/rat-mito.fna mtRNA
 
 
 # If a file of reference results is given, then compare to current results

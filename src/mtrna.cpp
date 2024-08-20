@@ -24,7 +24,6 @@
 #define mtNTH       3000 
 #define mtNTM       3
 #define mtNCDS      200
-#define mtNCDSCODON 6000
 #define mtGCBOND    0.0
 #define mtATBOND    -0.5
 #define mtGTBOND    -1.2
@@ -401,8 +400,8 @@ double par_mtdthresh = 85.0;
 int par_discrim = 0; // metazoan table
 int par_cloop7 = 0;
 int par_mtxdetect = 1; // see -x option which sets this to 0
-int par_loffset = 0;
-int par_roffset = 0;
+int par_loffset = 35;
+int par_roffset = 35;
 int par_tvloop = 1;
 // int par_aataildiv = 0; // 1 allows some divergence from the 3' amino-acyl acceptor sequence NCCA (-jr4 option)
 
@@ -619,7 +618,10 @@ std::vector<tRNA> predict_mtrnas(std::string &dna) {
   ct[4] = 0;
   ct[5] = 0;
 
-  for (; sc < sl; sc++) {
+  for (; sc < sl; sc++) { 
+
+    // fprintf(stderr, "d - sc=%d sl=%d\n", sc - seq, sl - seq);
+
     p = sc[17];
     ct[0] = (ct[0] << 4) | cAt[p];
     ct[1] = (ct[1] << 4) | cCt[p];
