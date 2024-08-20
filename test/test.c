@@ -65,9 +65,16 @@ std::vector<FastaEntry> read_fasta(const std::string& filename) {
 
 int main(int z, char *v[]) {
   std::string filename(v[1]);
+  std::string modality(v[2]);
+
   std::vector<FastaEntry> entries = read_fasta(filename);
   for(size_t i = 0; i < entries.size(); i++){
-    std::vector<tRNA> hits = predict_trnas(entries[i].sequence);
+    std::vector<tRNA> hits;
+    if (modality == "tRNA") { 
+      hits = predict_trnas(entries[i].sequence);
+    } else if (modality == "mtRNA") {
+      hits = predict_mtrnas(entries[i].sequence);
+    }
     for(size_t j = 0; j < hits.size(); j++){
       // It seems that their start and stop indices are incorrect?
       std::string trna_seq = entries[i].sequence.substr(hits[j].start, hits[j].stop - hits[j].start);

@@ -1,4 +1,5 @@
 #include "aragorn.hpp"
+#include "common.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,14 +7,6 @@
 
 #define INACTIVE        2.0e+35
 
-#define Adenine         0
-#define Cytosine        1
-#define Guanine         2
-#define Thymine         3
-#define AMBIG           4
-#define NOBASE          5
-
-#define ASTEM2_EXT      9
 #define MINTSTEM_DIST   (17 + ASTEM2_EXT)
 #define MAXTSTEM_DIST   (26 + ASTEM2_EXT)
 #define MINCTRNALEN     62
@@ -24,10 +17,15 @@
 #define VARDIFF         23                /* VARMAX - VARMIN */
 #define MAXTAGDIST      102
 
-#define ND          100
 #define NC          5000
-#define ATBOND      2.5
-#define GCBOND      3.0
+
+double bem[6][6] =
+ { { -2.144,-0.428,-2.144, ATBOND, 0.000, 0.000 },
+   { -0.428,-2.144, GCBOND,-2.144, 0.000, 0.000 },
+   { -2.144, GCBOND,-2.144, 1.286, 0.000, 0.000 },
+   {  ATBOND,-2.144, 1.286,-0.428, 0.000, 0.000 },
+   {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 },
+   {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 } };
 
 
 class Gene {
@@ -139,57 +137,23 @@ class Config {
 
 };
 
+/* LIBRARY */
 
-/* Basepair matching matrices */
-
-int bp[6][6] = { { 0,0,0,1,1,0 },
-                 { 0,0,1,0,1,0 },
-                 { 0,1,0,1,1,0 },
-                 { 1,0,1,0,1,0 },
-                 { 1,1,1,1,1,0 },
-                 { 0,0,0,0,0,0 } };
-
-int vbp[6][6] =
- { { 0,0,1,4,4,0 },
-   { 0,0,4,0,4,0 },
-   { 1,4,0,2,4,0 },
-   { 4,0,2,0,4,0 },
-   { 4,4,4,4,4,0 },
-   { 0,0,0,0,0,0 } };
-
-double bem[6][6] =
- { { -2.144,-0.428,-2.144, ATBOND, 0.000, 0.000 },
-   { -0.428,-2.144, GCBOND,-2.144, 0.000, 0.000 },
-   { -2.144, GCBOND,-2.144, 1.286, 0.000, 0.000 },
-   {  ATBOND,-2.144, 1.286,-0.428, 0.000, 0.000 },
-   {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 },
-   {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 } };
-
-
-std::vector<int> dna2int (const std::string& dna){
-  std::vector<int> seq(dna.size());
-  for(size_t i = 0; i < dna.size(); i++){
-    switch(dna[i]) {
-      case 'A':
-        seq[i] = Adenine;
-        break;
-      case 'T':
-        seq[i] = Thymine;
-        break;
-      case 'G':
-        seq[i] = Guanine;
-        break;
-      case 'C':
-        seq[i] = Cytosine;
-        break;
-      default:
-        seq[i] = AMBIG;
-    }
-  }
-  return seq;
+TrnaLoop make_trna_loop(int pos, int loop, int stem, double energy){
+  TrnaLoop x;
+  x.pos = pos;
+  x.loop = loop;
+  x.stem = stem;
+  x.energy = energy;
+  return(x);
 }
 
-/* LIBRARY */
+TrnaAstem make_astem(int pos, double energy){
+  TrnaAstem x;
+  x.pos = pos;
+  x.energy = energy;
+  return(x);
+}
 
 double vloop_stability(const std::vector<int>& seq, int sb, int var){
   int e,stem,vstem,loop;
@@ -248,24 +212,6 @@ double vloop_stability(const std::vector<int>& seq, int sb, int var){
      return(-12.0);
   }
 }
-
-
-TrnaLoop make_trna_loop(int pos, int loop, int stem, double energy){
-  TrnaLoop x;
-  x.pos = pos;
-  x.loop = loop;
-  x.stem = stem;
-  x.energy = energy;
-  return(x);
-}
-
-TrnaAstem make_astem(int pos, double energy){
-  TrnaAstem x;
-  x.pos = pos;
-  x.energy = energy;
-  return(x);
-}
-
 
 // find all tstems in the sequence
 std::vector<TrnaLoop> find_tstems(const std::vector<int>& s, const Config& sw) {
@@ -447,41 +393,6 @@ tRNA make_trna(Gene &g){
     h.tloop = g.tloop;
     h.score = g.energy;
     return h;
-}
-
-
-template <typename T>
-struct CompareByStart {
-    bool operator()(const T& a, const T& b) const {
-        return a.start < b.start;
-    }
-};
-
-// T is a feature object with `start` and `stop` fields
-template <class T>
-std::vector<T> best_hit(std::vector<T> hits) {
-  // sort hits by start position
-  std::sort(hits.begin(), hits.end(), CompareByStart<T>());
-
-  std::vector<T> best_hits;
-
-  // initialize
-  if (hits.size() > 0) {
-    best_hits.push_back(hits[0]);
-  }
-
-  // for hits that overlap, keep only the highest energy one
-  T last;
-  for(auto & hit : hits){
-    last = best_hits[best_hits.size() - 1];
-    if (hit.start > last.stop) {
-      best_hits.push_back(hit);
-    } else if (hit.score > last.score) {
-      best_hits[best_hits.size() - 1] = hit;
-    }
-  }
-  
-  return best_hits;
 }
 
 std::vector<tRNA> predict_trnas(std::string &dna) {

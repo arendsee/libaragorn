@@ -1,5 +1,5 @@
-#ifndef __ARAGORN_TRNA_HPP__
-#define __ARAGORN_TRNA_HPP__
+#ifndef __ARAGORN_HPP__
+#define __ARAGORN_HPP__
 
 #include <vector>
 #include <string>
