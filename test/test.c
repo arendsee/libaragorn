@@ -74,6 +74,8 @@ int main(int z, char *v[]) {
       hits = predict_trnas(entries[i].sequence);
     } else if (modality == "mtRNA") {
       hits = predict_mtrnas(entries[i].sequence);
+    } else if (modality == "tmRNA") {
+      hits = predict_tmrnas(entries[i].sequence);
     }
     for(size_t j = 0; j < hits.size(); j++){
       // It seems that their start and stop indices are incorrect?

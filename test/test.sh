@@ -35,6 +35,9 @@ echo "Testing mtRNA"
 
 ./test data/rat-mito.fna mtRNA
 
+echo "Testing tmRNA"
+
+./test data/tmRNA.fasta tmRNA
 
 # If a file of reference results is given, then compare to current results
 if [[ -d gold ]]

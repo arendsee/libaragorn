@@ -28,3 +28,7 @@ done
 These examples are all spliced.
 
 tRNA samples with introns are retrieved from https://gtrnadb.ucsc.edu
+
+## tmRNA
+
+From the tmRDB database, file https://rth.dk/resources/rnp/tmRDB/rna/sequences/tmrna_seqs.zip
