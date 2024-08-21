@@ -28,4 +28,6 @@ std::vector<tRNA> predict_trnas(std::string &dna);
 
 std::vector<tRNA> predict_mtrnas(std::string &dna);
 
+std::vector<tRNA> predict_tmrnas(std::string &dna);
+
 #endif
