@@ -7,9 +7,9 @@
 #define INACTIVE        2.0e+35
 #define TERM            -1
 
-#define ASTEM2_EXT       9
-#define MINTSTEM_DIST      (17 + ASTEM2_EXT)
-#define MAXTSTEM_DIST      (26 + ASTEM2_EXT)
+#define ASTEM2_EXT      9
+#define MINTSTEM_DIST   (17 + ASTEM2_EXT)
+#define MAXTSTEM_DIST   (26 + ASTEM2_EXT)
 #define MAXINTRONLEN    3000
 #define MINCTRNALEN     62
 #define MAXCTRNALEN     110
@@ -41,7 +41,6 @@
 #define ATBOND      2.5
 
 int par_tmstrict = 0;
-double par_trnathresh = 132.0;
 double par_tmrthresh = 9.0;
 int par_aataildiv = 0;
 int par_maxintronlen = 0;
@@ -458,7 +457,7 @@ void tmopt(std::vector<tRNA> &gs,
           trna_loop *th, int tarm, double the,
           trna_loop *ahit, int nah,
           int *seq) {
-  int r,na,nr,nrh,ibase,flag,as,nbasefext;
+  int r,na,nr,nrh,ibase,flag,nbasefext;
   int *s,*v,*s1,*s2,*sa,*sb,*se,*sf,*ps,*tpos,pseq[MAXETRNALEN+1];
   static int gtem[6] = { 0x00,0x00,0x11,0x00,0x00,0x00 };
   static double A[6] = { 6.0,0.0,0.0,0.0,0.0,0.0 };
@@ -567,7 +566,7 @@ void tmopt_perm(std::vector<tRNA> &gs,
           trna_loop *th, int tarm, double the,
           trna_loop *ahit, int nah,
           int *seq)
-{ int r,na,nr,nrh,flag,as;
+{ int r,na,nr,nrh,flag;
   int *s,*v,*s1,*s2,*sa,*sb,*se,*sf,*ps,*apos,*tpos;
   static int gtem[6] = { 0x00,0x00,0x11,0x00,0x00,0x00 };
   double e,energy,penergy,tenergy,aenergy,athresh,cthresh,cathresh;
@@ -586,7 +585,7 @@ void tmopt_perm(std::vector<tRNA> &gs,
      {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 },
      {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 } };
   static trna_loop rhit[NH];
-  gene te,*tn;
+  gene te;
   static gene t =
    { "",{TERM},{TERM},NULL,0,0,0L,0L,7,7,1,0,0,0,13,8,0,28,0,0,3,0,5,7,
      1,0.0,0,0,0 };
@@ -685,17 +684,12 @@ std::vector<tRNA> predict_tmrnas(std::string &dna) {
 
   std::vector<tRNA> gs;
 
-  int i,j,k,intron,nt,nth,nd1,nd2,ndx,ndh,na,nah,nppah,nc,nch,tfold,tarm;
-  int dstem,dloop,flag,mindist,maxdist,tmindist,tmaxdist,tmmindist,tmmaxdist;
-  int tarmthresh,ige[7];
-  int *se,*sc,*sb,*si,*tpos,*tend,*apos,*dpos,*tloopfold,*tmv,*cend;
-  int *s1,*s2,*sd,*sf,*sl,*sg1,*sg2,*cposmin,*cposmax,*cpos;
-  unsigned int r,q,c;
-  double e,ec,he,the,thet,energy,cenergy,denergy,ienergy;
-  double genergy,energy2,energyf,energyf6;
+  int nt,nth,nah,nppah,tarm;
+  int mindist,maxdist,tmindist,tmaxdist,tmmindist,tmmaxdist;
+  int *tpos,*tend;
+  double the,thet;
   static double G[6] = { 0.0,0.0,6.0,0.0,0.0,0.0 };
-  static trna_loop thit[NTH],chit[NC],ahit[NA];
-  gene te;
+  static trna_loop thit[NTH],ahit[NA];
   static gene t =
    { "",{TERM},{TERM},NULL,0,0,0L,0L,7,7,1,2,1,3,9,5,7,0,0,0,15,0,5,7,
      1,0.0,0,0,0 };
@@ -705,32 +699,26 @@ std::vector<tRNA> predict_tmrnas(std::string &dna) {
   tmaxdist = (MAXTRNALEN + par_maxintronlen - MINTSTEM_DIST);
   mindist = (tmindist < tmmindist)?tmindist:tmmindist;
   maxdist = (tmaxdist > tmmaxdist)?tmaxdist:tmmaxdist;
-  tarmthresh = par_ttarmthresh;
   nth = find_tstems(seq,lseq,thit,NTH);
   nt = -1;
   while (++nt < nth) {
     tpos = thit[nt].pos;
     t.tloop = thit[nt].loop;
     t.tstem = thit[nt].stem;
-    tfold = tpos[-1];
-    tloopfold = tpos + t.tstem + 1;
     tarm = 2*t.tstem + t.tloop;
     tend = tpos + tarm;
-    tmv = tpos - VARMIN;
-    flag = 0;
-    te.energy = par_trnathresh;
     the = thit[nt].energy;
     nah = find_astem5(tpos-maxdist,tpos-mindist,tend,7,ahit,NA);
     thet = the - G[tpos[t.tstem]] - G[tpos[t.tstem+1]];
     if (par_tmstrict){
-      if (thet >= tarmthresh)
+      if (thet >= par_ttarmthresh)
         tmopt(gs, thit+nt,tarm,thet,ahit,nah,seq);
     } else {
       tmopt(gs, thit+nt,tarm,the,ahit,nah,seq);
     }
     nppah = find_astem5(tpos+MINPPASDIST,tpos+MAXPPASDIST, tend,7,ahit+nah,NA-nah);
     tmopt_perm(gs, thit+nt,tarm,the,ahit+nah,nppah,seq);
-    if (thet < tarmthresh) continue;
+    if (thet < par_ttarmthresh) continue;
     the = thet;
   }
   return(gs);
