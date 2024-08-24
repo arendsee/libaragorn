@@ -150,6 +150,9 @@ std::vector<TrnaLoop> find_tstems(const std::vector<int>& s,
 }
 
 std::vector<TrnaAstem> find_astem5(const std::vector<int>& seq, int si, int sl, int astem3, int n3, double tascanthresh, double tastemthresh){
+
+  // fprintf(stderr, "entering find_astem5 (si=%d, sl=%d, astem3=%d, n3=%d, seq.size()=%d)\n", si, sl, astem3, n3, seq.size());
+
   std::vector<TrnaAstem> hits;
   int k;
   int s1, s2, se;
@@ -171,7 +174,10 @@ std::vector<TrnaAstem> find_astem5(const std::vector<int>& seq, int si, int sl, 
      {  0.000,   0.000,  0.000,  0.000, 0.000, 0.000 } };
   sl += n3;
   se = astem3 + n3 - 1;
-  if(se >= N) return hits;
+
+  // fprintf(stderr, " > sl=%d se=%d\n", sl, se);
+
+  if(se >= N || si >= N) return hits;
   tem[0] = A[seq[se]];
   tem[1] = C[seq[se]];
   tem[2] = G[seq[se]];
@@ -183,23 +189,37 @@ std::vector<TrnaAstem> find_astem5(const std::vector<int>& seq, int si, int sl, 
      tem[3] = (tem[3] << 4) + T[seq[se]]; }
   r = tem[seq[si++]];
   k = 1;
-  while (++k < n3) r = (r >> 4) + tem[seq[si++]];
-  while (si < sl)
-   { r = (r >> 4) + tem[seq[si++]];
-     if ((r & 15) >= (int)tascanthresh)
-      { s1 = astem3;
-        s2 = si;
-        se = s1 + n3;
-        energy = abem[seq[s1++]][seq[--s2]];
-        while (s1 < se)
-         energy += abem[seq[s1++]][seq[--s2]];
-        if (energy >= tastemthresh)
-        {
-          hits.push_back(make_astem(si - n3, energy));
-        }
+
+  // fprintf(stderr, " > si=%d se=%d\n", si, se);
+
+  while (++k < n3) {
+    if(si >= N) return hits;
+    r = (r >> 4) + tem[seq[si++]];
+  }
+
+  // fprintf(stderr, " > si=%d\n", si);
+
+  if(sl >= N) return hits;
+  while (si < sl){
+    r = (r >> 4) + tem[seq[si++]];
+    if ((r & 15) >= (int)tascanthresh){
+      s1 = astem3;
+      s2 = si;
+      se = s1 + n3;
+      energy = abem[seq[s1++]][seq[--s2]];
+      while (s1 < se) {
+        energy += abem[seq[s1++]][seq[--s2]];
       }
-   }
-  return(hits); }
+      if (energy >= tastemthresh) {
+        hits.push_back(make_astem(si - n3, energy));
+      }
+    }
+  }
+
+  // fprintf(stderr, " > si=%d s1=%d s2=%d\n", si, s1, s2);
+
+  return(hits);
+}
 
 TrnaLoop make_trna_loop(int pos, int loop, int stem, double energy){
   TrnaLoop x;

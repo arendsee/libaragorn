@@ -53,9 +53,9 @@ double par_ttscanthresh = 4.0;
 double par_tastemthresh = 7.5;
 double par_tascanthresh = 8.0;
 static int par_loffset = 0;
-static int par_roffset = 0;
+static int par_roffset = 20;
 
-double find_taghairpin(const std::vector < int > & seq, int seq_idx) {
+double find_taghairpin(const std::vector<int> & seq, int seq_idx) {
   int i, s, sb, se, sf;
   unsigned int c, m, mx;
   static unsigned int A[6] = { 0, 0, 0, 1, 0, 0 };
@@ -67,6 +67,8 @@ double find_taghairpin(const std::vector < int > & seq, int seq_idx) {
   sb = seq_idx - 20;
   se = seq_idx - 13;
   sf = seq_idx - 4;
+
+  if (sb >= seq.size()) return 0.0;
   t[0] = A[seq[sb]];
   t[1] = C[seq[sb]];
   t[2] = G[seq[sb]];
@@ -85,6 +87,8 @@ double find_taghairpin(const std::vector < int > & seq, int seq_idx) {
     sb++;
     s = seq_idx + 20;
     se = seq_idx + 2;
+
+    if (s >= seq.size()) return 0.0;
     m = t[seq[s--]];
     while (s > se) {
       m = (m >> 4) + t[seq[s--]];
@@ -101,7 +105,7 @@ double find_taghairpin(const std::vector < int > & seq, int seq_idx) {
   return ((double)(mx << 1));
 }
 
-double find_tag_upstream_hairpin(const std::vector < int > & seq, int se) {
+double find_tag_upstream_hairpin(const std::vector<int> & seq, int se) {
   int sb, sd, sf, sh, s;
   unsigned int c, m, mx;
   static unsigned int A[6] = {       0,       0,       0, 0x10000, 0, 0 };
@@ -112,6 +116,8 @@ double find_tag_upstream_hairpin(const std::vector < int > & seq, int se) {
   mx = 0;
   sf = se - 4;
   sb = se - 20;
+
+  if (se >= seq.size()) return 0.0;
   t[0] = A[seq[se]];
   t[1] = C[seq[se]];
   t[2] = G[seq[se]];
@@ -147,12 +153,15 @@ double find_tag_upstream_hairpin(const std::vector < int > & seq, int se) {
 }
 
 
-std::vector < TrnaLoop > find_resume_seq(const std::vector < int > & seq, int seq_idx, int window_size) {
+std::vector<TrnaLoop> find_resume_seq(const std::vector<int> & seq, int seq_idx, int window_size) {
+
+  // fprintf(stderr, "resume seq:\n");
+
   int e, i, j, k, a, aa[3], si, sb, sf, st, sl;
   double al;
   unsigned int r, c, thresh;
 
-  std::vector < TrnaLoop > hits;
+  std::vector<TrnaLoop> hits;
   int hit_pos;
   int hit_stem;
   double hit_energy;
@@ -180,6 +189,10 @@ std::vector < TrnaLoop > find_resume_seq(const std::vector < int > & seq, int se
   static int M[6] = { 0,0,1,1,1,1 };
   thresh = (unsigned int) par_tmrthresh;
   sl = seq_idx + window_size;
+
+  // fprintf(stderr, " > seq_idx=%d seq.size()=%d\n", seq_idx, seq.size());
+
+  if (seq_idx + 7 >= seq.size() || seq_idx < 0) return hits;
   r = tem[seq[seq_idx++]];
   r = (r >> 4) + tem[seq[seq_idx++]];
   r = (r >> 4) + tem[seq[seq_idx++]];
@@ -187,10 +200,14 @@ std::vector < TrnaLoop > find_resume_seq(const std::vector < int > & seq, int se
   r = (r >> 4) + tem[seq[seq_idx++]];
   r = (r >> 4) + tem[seq[seq_idx++]];
   r = (r >> 4) + tem[seq[seq_idx++]];
-  if (par_tmstrict)
+
+  if (par_tmstrict) {
+    // fprintf(stderr, " strict\n");
     while (seq_idx < sl) {
       r = (r >> 4) + tem[seq[seq_idx++]];
       if ((c = (r & 0xF)) < thresh) continue;
+      
+      if (seq_idx + 8 >= seq.size()) return hits;
       c -= (V[seq[seq_idx + 1]] + V[seq[seq_idx + 2]] + M[seq[seq_idx + 5]] + A[seq[seq_idx + 8]]);
       if (c < thresh) continue;
       st = seq_idx - 2;
@@ -198,13 +215,17 @@ std::vector < TrnaLoop > find_resume_seq(const std::vector < int > & seq, int se
       sb = st + MINTAGDIST + 2;
       sf = st + MAXTAGDIST;
       while (si < sf) {
+
+        if (si >= seq.size()) return hits;
         if (seq[si++] != Thymine)
           si++;
-        else
-        if (seq[si] == Adenine) {
+        else if (seq[si] == Adenine) {
+
+          if (si+1 >= seq.size()) return hits;
           if (!(seq[++si] & 5)) goto ST1;
-        } else
-        if (seq[si] == Guanine) {
+        } else if (seq[si] == Guanine) {
+
+          if (si+1 >= seq.size()) return hits;
           if (seq[++si] == Adenine) goto ST1;
         } else si++;
         si++;
@@ -216,6 +237,8 @@ std::vector < TrnaLoop > find_resume_seq(const std::vector < int > & seq, int se
       k = 0;
       j = -11;
       while (j < -2) {
+
+        if (si+j+2 >= seq.size()) return hits;
         a = seq[si + j++];
         a = (a << 2) | seq[si + j++];
         if (a == 9) al = (double)(11 + 2 * ((j + 9) / 3));
@@ -232,21 +255,30 @@ std::vector < TrnaLoop > find_resume_seq(const std::vector < int > & seq, int se
 
       hits.push_back(make_trna_loop(hit_pos, -1, hit_stem, hit_energy));
     }
-  else
+  } else {
+    // fprintf(stderr, " non-strict\n");
     while (seq_idx < sl) {
+
+      if (seq_idx >= seq.size()) return hits;
       r = (r >> 4) + tem[seq[seq_idx++]];
       if ((c = (r & 0xF)) < thresh) continue;
       st = seq_idx - 2;
       si = st + MINTAGDIST;
       sf = st + MAXTAGDIST;
       while (si < sf) {
+
+        if (si >= seq.size()) return hits;
         if (seq[si++] != Thymine)
           si++;
         else
         if (seq[si] == Adenine) {
+
+          if (si+1 >= seq.size()) return hits;
           if (!(seq[++si] & 5)) goto ST2;
         } else
         if (seq[si] == Guanine) {
+
+          if (si+1 >= seq.size()) return hits;
           if (seq[++si] == Adenine) goto ST2;
         } else si++;
         si++;
@@ -262,15 +294,18 @@ std::vector < TrnaLoop > find_resume_seq(const std::vector < int > & seq, int se
 
       hits.push_back(make_trna_loop(hit_pos, -1, hit_stem, hit_energy));
     }
+  }
+
+  // fprintf(stderr, " leaving resume\n");
 
   return (hits);
 }
 
 
-void tmopt(const std::vector < int > & seq,
-  std::vector < tRNA > & gs,
+void tmopt(const std::vector<int> & seq,
+  std::vector<tRNA> & gs,
   TrnaLoop tloop, int tarm, double the,
-  const std::vector < TrnaAstem > & astem_hits) {
+  const std::vector<TrnaAstem> & astem_hits) {
   int r, ibase, flag, nbasefext;
   static int gtem[6] = { 0x00, 0x00, 0x11, 0x00, 0x00, 0x00 };
   int s, v, s1, s2, sa, sb, se, sf, ps, tpos, pseq[MAXETRNALEN + 1];
@@ -301,6 +336,8 @@ void tmopt(const std::vector < int > & seq,
   t.intron = 28;
   t.var = 3;
 
+  // fprintf(stderr, " a\n");
+
   tpos = tloop.pos;
   flag = 0;
   te.energy = par_tmrnathresh;
@@ -309,20 +346,31 @@ void tmopt(const std::vector < int > & seq,
   cathresh = par_tmcathresh;
   s = tpos + tarm + 4;
   v = tpos + tloop.stem - 10;
+
+  if (v+3 >= seq.size()) return;
   energy = K[seq[v]] + G[seq[v + 1]] + A[seq[v + 2]];
   e = K[seq[v + 1]] + G[seq[v + 2]] + A[seq[v + 3]];
   if (e > energy) energy = e;
   if (energy < 18.0) energy = 0.0;
+
+
+  if (s+3 >= seq.size()) return;
   tenergy = Tr[seq[s]] + Cr[seq[s + 1]] + Cr[seq[s + 2]] + Ar[seq[s + 3]] + energy + 1.59 * the;
 
-  std::vector < TrnaLoop > rhits = find_resume_seq(seq, tpos - MAXTPTSDIST, TPWINDOW);
+  std::vector<TrnaLoop> rhits = find_resume_seq(seq, tpos - MAXTPTSDIST, TPWINDOW);
+
+  // fprintf(stderr, " b\n");
 
   for (auto & rhit: rhits) {
     ps = rhit.pos;
     penergy = tenergy + rhit.energy - 0.001 * ((double)(tpos - ps));
     if (rhit.stem < 24) penergy -= 15.0;
 
+    // fprintf(stderr, ".");
+
     for (auto & astem: astem_hits) {
+
+      // fprintf(stderr, ",");
       aenergy = astem.energy;
       if (aenergy < athresh) continue;
       t.ps = astem.pos;
@@ -334,8 +382,13 @@ void tmopt(const std::vector < int > & seq,
         for (sf = tpos - 3; sf >= (tpos - 7); sf--) {
           s1 = sb;
           s2 = sf;
+
+          if(s1 >= seq.size()) return;
           e = bem[seq[s1++]][seq[--s2]];
-          while (s1 < se) e += bem[seq[s1++]][seq[--s2]];
+          while (s1 < se) {
+            if(s1 >= seq.size()) return;
+            e += bem[seq[s1++]][seq[--s2]];
+          }
           if (e > energy) {
             energy = e;
             t.var = (int)(tpos - sf);
@@ -347,6 +400,8 @@ void tmopt(const std::vector < int > & seq,
       if (energy < cathresh) continue;
       sb = sa + 3;
       sf = sa + 7;
+
+      if(sf >= seq.size()) return;
       r = gtem[seq[sb++]];
       while (sb < sf) {
         r = (r >> 4) + gtem[seq[sb++]];
@@ -369,7 +424,11 @@ void tmopt(const std::vector < int > & seq,
       }
     }
   }
+
+  // fprintf(stderr, ">\n");
+
   if (flag) {
+    // fprintf(stderr, "found one\n");
     te.start = (long)(te.ps);
     s = te.ps + te.nbase + te.nintron;
     nbasefext = te.nbase + ASTEM2_EXT;
@@ -378,13 +437,15 @@ void tmopt(const std::vector < int > & seq,
     te.asst = 0;
     gs.push_back(make_trna(te));
   }
+
+  // fprintf(stderr, ".\n");
 }
 
 
-void tmopt_perm(const std::vector < int > & seq,
-  std::vector < tRNA > & gs,
+void tmopt_perm(const std::vector<int> & seq,
+  std::vector<tRNA> & gs,
   TrnaLoop tloop, int tarm, double the,
-  const std::vector < TrnaAstem > & astem_hits) {
+  const std::vector<TrnaAstem> & astem_hits) {
   int r, na, nr, nrh, flag;
   int s, v, s1, s2, sa, sb, se, sf, ps, apos, tpos;
   static int gtem[6] = { 0x00, 0x00, 0x11, 0x00, 0x00, 0x00 };
@@ -426,10 +487,15 @@ void tmopt_perm(const std::vector < int > & seq,
   cathresh = par_tmcathresh;
   s = tpos + tarm + 4;
   v = tpos + tloop.stem - 10;
+
+  if(v+3 >= seq.size()) return;
   energy = K[seq[v]] + G[seq[v + 1]] + A[seq[v + 2]];
   e = K[seq[v + 1]] + G[seq[v + 2]] + A[seq[v + 3]];
   if (e > energy) energy = e;
   if (energy < 18.0) energy = 0.0;
+
+
+  if(s+3 >= seq.size()) return;
   tenergy = Tr[seq[s]] + Cr[seq[s + 1]] + Cr[seq[s + 2]] + Ar[seq[s + 3]] + energy + 1.59 * the;
   for (auto & astem: astem_hits) {
     aenergy = astem.energy;
@@ -439,6 +505,8 @@ void tmopt_perm(const std::vector < int > & seq,
     if (apos > (tpos + MAXTSTEM_DIST + MAXPPINTRONDIST)) break;
     energy = -INACTIVE;
     sa = apos + t.astem1;
+
+    if(sa+16 >= seq.size()) return;
     for (sb = sa + 9, se = sb + t.cstem; sb <= (sa + 16); sb++, se++) {
       for (sf = tpos - 3; sf >= (tpos - 7); sf--) {
         s1 = sb;
@@ -457,6 +525,8 @@ void tmopt_perm(const std::vector < int > & seq,
     if (energy < cathresh) continue;
     sb = sa + 3;
     sf = sa + 7;
+
+    if(sf >= seq.size()) return;
     r = gtem[seq[sb++]];
     while (sb < sf) {
       r = (r >> 4) + gtem[seq[sb++]];
@@ -465,8 +535,10 @@ void tmopt_perm(const std::vector < int > & seq,
         break;
       }
     }
+
+    if(apos+2 >= seq.size()) return;
     penergy = tenergy + Ga[seq[apos + 1]] + Ga[seq[apos + 2]] + energy;
-    std::vector < TrnaLoop > rhits = find_resume_seq(seq, apos + MINTPDIST, TPWINDOW);
+    std::vector<TrnaLoop> rhits = find_resume_seq(seq, apos + MINTPDIST, TPWINDOW);
     for (auto & rhit: rhits) {
       ps = rhit.pos;
       t.energy = penergy + rhit.energy;
@@ -501,16 +573,17 @@ void tmopt_perm(const std::vector < int > & seq,
 
 
 
-std::vector < tRNA > predict_tmrnas(std::string & dna) {
+std::vector<tRNA> predict_tmrnas(std::string & dna) {
 
-  std::vector < int > seq = dna2int(dna);
+  std::vector<int> seq = dna2int(dna);
 
-  std::vector < tRNA > gs;
-  std::vector < TrnaAstem > astem_hits, astem_hits_2;
+  std::vector<tRNA> gs;
+  std::vector<TrnaAstem> astem_hits, astem_hits_2;
 
   int nt, nth, nah, nppah, tarm;
   int mindist, maxdist, tmindist, tmaxdist, tmmindist, tmmaxdist;
   int tpos, tend;
+  int astem_start, astem_end;
   double the, thet;
   static double G[6] = { 0.0, 0.0, 6.0, 0.0, 0.0, 0.0 };
   Gene t = Gene();
@@ -524,21 +597,48 @@ std::vector < tRNA > predict_tmrnas(std::string & dna) {
 
   for (auto & tloop: find_tstems(seq, par_loffset, par_roffset, par_ttscanthresh, par_ttarmthresh)) {
     tpos = tloop.pos;
+
     t.tloop = tloop.loop;
     t.tstem = tloop.stem;
     tarm = 2 * t.tstem + t.tloop;
     tend = tpos + tarm;
     the = tloop.energy;
-    astem_hits = find_astem5(seq, tpos - maxdist, tpos - mindist, tend, 7, par_tascanthresh, par_tastemthresh);
+
+    astem_start = (maxdist < tpos) ? tpos - maxdist : 0;
+    astem_end = (mindist < tpos) ? tpos - mindist : 0;
+
+    // fprintf(stderr, "a\n");
+
+    astem_hits = find_astem5(seq, astem_start, astem_end, tend, 7, par_tascanthresh, par_tastemthresh);
+
+    // fprintf(stderr, "b\n");
+
+    if(tpos + t.tstem + 1 >= seq.size()) return gs;
     thet = the - G[seq[tpos + t.tstem]] - G[seq[tpos + t.tstem + 1]];
     if (par_tmstrict) {
-      if (thet >= par_ttarmthresh)
+      if (thet >= par_ttarmthresh) {
+        // fprintf(stderr, "ba\n");
         tmopt(seq, gs, tloop, tarm, thet, astem_hits);
+        // fprintf(stderr, "bb\n");
+      }
     } else {
+      // fprintf(stderr, "ca\n");
       tmopt(seq, gs, tloop, tarm, the, astem_hits);
+      // fprintf(stderr, "cb\n");
     }
+
+    // fprintf(stderr, "tpos + MINPPASDIST = %d\n", tpos + MINPPASDIST);
+    // fprintf(stderr, "tpos + MAXPPASDIST = %d\n", tpos + MAXPPASDIST);
+    // fprintf(stderr, "tend = %d\n", tend);
+
     astem_hits_2 = find_astem5(seq, tpos + MINPPASDIST, tpos + MAXPPASDIST, tend, 7, par_tascanthresh, par_tastemthresh);
+
+    // fprintf(stderr, "c\n");
+
     tmopt_perm(seq, gs, tloop, tarm, the, astem_hits_2);
+
+    // fprintf(stderr, "d\n");
+
     if (thet < par_ttarmthresh) continue;
     the = thet;
   }
