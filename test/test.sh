@@ -33,11 +33,11 @@ echo $(grep -c '>' data/sample-euk-intronic.fa) $(grep -c "seq = " test-euk-intr
 
 echo "Testing mtRNA"
 
-./test data/rat-mito.fna mtRNA
+./test data/rat-mito.fna mtRNA > /dev/null
 
 echo "Testing tmRNA"
 
-./test data/tmRNA.fasta tmRNA
+./test data/tmRNA.fasta tmRNA > /dev/null
 
 # If a file of reference results is given, then compare to current results
 if [[ -d gold ]]

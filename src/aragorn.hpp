@@ -22,6 +22,10 @@ typedef struct {
     int tstem;
     int tloop;
     int astem2;
+    // tmRNA stuff, TODO: move to dedicated struct
+    int tps;
+    int tpe;
+    int asst;
 } tRNA;
 
 std::vector<tRNA> predict_trnas(std::string &dna);

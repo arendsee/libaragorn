@@ -28,71 +28,12 @@ double bem[6][6] =
    {  0.000, 0.000, 0.000, 0.000, 0.000, 0.000 } };
 
 
-class Gene {
-  public:
-    int ps;
-    int nbase;
-    int start;
-    int stop;
-    int astem1;
-    int astem2;
-    int spacer1;
-    int spacer2;
-    int dstem;
-    int dloop;
-    int cstem;
-    int cloop;
-    int intron;
-    int nintron;
-    int anticodon;
-    int var;
-    int tstem;
-    int tloop;
-    double energy;
-
-  Gene () {
-    ps        = 0;
-    nbase     = 0;
-    start     = 0L;
-    stop      = 0L;
-    astem1    = 7;
-    astem2    = 7;
-    spacer1   = 2;
-    spacer2   = 1;
-    dstem     = 3;
-    dloop     = 9;
-    cstem     = 5;
-    cloop     = 7;
-    intron    = 0;
-    nintron   = 0;
-    anticodon = 0;
-    var       = 15;
-    tstem     = 5;
-    tloop     = 7;
-    energy    = 0.0;
-  }
-};
-
-class TrnaLoop {
-  public:
-    int pos;
-    int stem; // length of the T-stem (4 or 5)
-    int loop;
-    double energy;
-};
-
 class TrnaDloop {
   public:
     int pos;
     int end;
     int stem;
     int loop;
-    double energy;
-};
-
-class TrnaAstem {
-  public:
-    int pos;
     double energy;
 };
 
@@ -138,22 +79,6 @@ class Config {
 };
 
 /* LIBRARY */
-
-TrnaLoop make_trna_loop(int pos, int loop, int stem, double energy){
-  TrnaLoop x;
-  x.pos = pos;
-  x.loop = loop;
-  x.stem = stem;
-  x.energy = energy;
-  return(x);
-}
-
-TrnaAstem make_astem(int pos, double energy){
-  TrnaAstem x;
-  x.pos = pos;
-  x.energy = energy;
-  return(x);
-}
 
 double vloop_stability(const std::vector<int>& seq, int sb, int var){
   int e,stem,vstem,loop;
@@ -213,187 +138,12 @@ double vloop_stability(const std::vector<int>& seq, int sb, int var){
   }
 }
 
-// find all tstems in the sequence
-std::vector<TrnaLoop> find_tstems(const std::vector<int>& s, const Config& sw) {
-  std::vector<TrnaLoop> hits;
-
-  int r,c,tstem,tloop;
-  int s1, s2, se, ss, si, sb, sc, sf, sl, sx;
-  double ec,energy,penalty;
-  static double bem[6][6] = {
-  //    A        C       G       T
-     { -2.144,  -0.428, -2.144,  ATBOND, 0.000, 0.000 }, // A
-     { -0.428,  -2.144,  GCBOND, -2.144, 0.000, 0.000 }, // C
-     { -2.144,   GCBOND, -2.144,  1.286, 0.000, 0.000 }, // G
-     {  ATBOND, -2.144,  1.286, -0.428,  0.000, 0.000 }, // T
-     {  0.000,   0.000,  0.000,  0.000,  0.000, 0.000 },
-     {  0.000,   0.000,  0.000,  0.000,  0.000, 0.000 } };
-
-  static double A[6] = { 2.0,0.0,0.0,0.0,0.0,0.0 };
-  static double C[6] = { 0.0,2.0,0.0,0.0,0.0,0.0 };
-  static double G[6] = { 0.0,0.0,2.0,0.0,0.0,0.0 };
-  static double T[6] = { 0.0,0.0,0.0,2.0,0.0,0.0 };
-                      // A       C       G       T       -       -
-  static int tem[6]  = { 0x0100, 0x0002, 0x2000, 0x0220, 0x0000, 0x0000 };
-
-  // left starting position after applying offset
-  ss = sw.loffset;
-
-  // pointer to the moving t-start?
-  // And 4 - 1 because???
-  si = ss + 4 - 1;
-
-  // right ending position after applying offset
-  // And 5 + 3 because???
-  sl = s.size() - sw.roffset + 5 + 3;
-
-  // initialize the scanning bit pattern with the first three bases
-  r = tem[s[si++]];
-  r = (r >> 4) + tem[s[si++]];
-  r = (r >> 4) + tem[s[si++]];
-
-  while (si < sl) {
-    r = (r >> 4) + tem[s[si++]];
-
-    // The `r & 0xF` trick gets the rightmost byte from r
-    // The 4th byte contains information about the 4 prior bytes
-    // that match the pattern GTTC. The match can contain any two of these
-    // bases (at the default ttscanthresh and with tem_trna).
-    if ((c = (r & 0xF)) < (int)sw.ttscanthresh) continue;
-
-    // T-Loop with canonical numbering:
-    //
-    //                           (60) (59)
-    //  (65) (64) (63) (62) (61)          (58)
-    //    |    |    |    |    |            (57)
-    //  (49) (50) (51) (52) (53)          (56)
-    //                       G   (54) (55) C
-    //                            T    T   *
-    //
-    // subtract 7 from the start index to move from position 56 at the end of
-    // the GTTC match to the start of the loop
-    sb = si - 7;
-
-    // add 13 to the end index (the extra bases allow for variation in loop size
-    sf = sb + 13;
-
-    ec = (double)(3*c);
-
-    // Loop through possible lengths of the T-stem
-    for (tstem = 4; tstem <= 5; tstem++) {
-      if (sb < (sl-8)){
-        sc = sf;
-        sx = si - 2;
-        // Loop through possible sizes of the T-loop
-        for (tloop = 5; tloop <= 9; tloop++) {
-          if (tloop > 7)
-            penalty = 3.0*(double)(tloop - tstem - 2);
-          else
-            penalty = 3.0*(double)(12 - tloop - tstem);
-          s1 = sb;
-          s2 = sc;
-          se = s1 + tstem;
-          energy = ec + bem[s[se]][s[se + 4]] + bem[s[s1++]][s[--s2]] - penalty;
-          while (s1 < se) energy += bem[s[s1++]][s[--s2]];
-          energy += G[s[sx]] + A[s[sx + 1]] + T[s[sx + 3]] + C[s[sx + 4]] + C[s[sx + 5]];
-          if (energy >= sw.ttarmthresh) {
-             hits.push_back(make_trna_loop(sb, tloop, tstem, energy));
-          }
-          sx++;
-          sc++;
-        }
-      }
-      if (--sb < ss) break;
-      sf++;
-    }
-  }
-  return(hits);
-}
-
-
-std::vector<TrnaAstem> find_astem5(const std::vector<int>& seq, int si, int sl, int astem3, int n3, const Config& sw){
-  std::vector<TrnaAstem> hits;
-  int k;
-  int s1, s2, se;
-  int r,tascanthresh;
-  int N = (int) seq.size();
-  double tastemthresh,energy;
-  static int tem[6] = { 0,0,0,0,0,0 };
-  static int A[6] = { 0,0,0,2,0,0 };
-  static int C[6] = { 0,0,2,0,0,0 };
-  static int G[6] = { 0,2,0,1,0,0 };
-  static int T[6] = { 2,0,1,0,0,0 };
-  static double abem[6][6] =
-  //    A        C       G       T
-   { { -2.144,  -0.428, -2.144, ATBOND, 0.000, 0.000 },
-     { -0.428,  -2.144, GCBOND, -2.144, 0.000, 0.000 },
-     { -2.144,  GCBOND, -2.144,  1.286, 0.000, 0.000 },
-     {  ATBOND, -2.144,  1.286, -0.428, 0.000, 0.000 },
-     {  0.000,   0.000,  0.000,  0.000, 0.000, 0.000 },
-     {  0.000,   0.000,  0.000,  0.000, 0.000, 0.000 } };
-  tascanthresh = (int)sw.tascanthresh;
-  tastemthresh = sw.tastemthresh;
-  sl += n3;
-  se = astem3 + n3 - 1;
-  if(se >= N) return hits;
-  tem[0] = A[seq[se]];
-  tem[1] = C[seq[se]];
-  tem[2] = G[seq[se]];
-  tem[3] = T[seq[se]];
-  while (--se >= astem3)
-   { tem[0] = (tem[0] << 4) + A[seq[se]];
-     tem[1] = (tem[1] << 4) + C[seq[se]];
-     tem[2] = (tem[2] << 4) + G[seq[se]];
-     tem[3] = (tem[3] << 4) + T[seq[se]]; }
-  r = tem[seq[si++]];
-  k = 1;
-  while (++k < n3) r = (r >> 4) + tem[seq[si++]];
-  while (si < sl)
-   { r = (r >> 4) + tem[seq[si++]];
-     if ((r & 15) >= tascanthresh)
-      { s1 = astem3;
-        s2 = si;
-        se = s1 + n3;
-        energy = abem[seq[s1++]][seq[--s2]];
-        while (s1 < se)
-         energy += abem[seq[s1++]][seq[--s2]];
-        if (energy >= tastemthresh)
-        {
-          hits.push_back(make_astem(si - n3, energy));
-        }
-      }
-   }
-  return(hits); }
-
-
 void ti_genedetected(Gene& te, const Config& sw) {
   te.nbase = te.astem1 + te.spacer1 + te.spacer2 + 2*te.dstem +
               te.dloop +  2*te.cstem + te.cloop +
               te.var + 2*te.tstem + te.tloop + te.astem2;
   te.start = te.ps;
   te.stop = te.ps + te.nbase; }
-
-tRNA make_trna(Gene &g){
-    tRNA h;
-    h.start = g.start;
-    h.stop = g.stop;
-    h.astem1 = g.astem1;
-    h.astem2 = g.astem2;
-    h.spacer1 = g.spacer1;
-    h.spacer2 = g.spacer2;
-    h.dstem = g.dstem;
-    h.dloop = g.dloop;
-    h.cstem = g.cstem;
-    h.cloop = g.cloop;
-    h.intron_start = g.intron;
-    h.intron_length = g.nintron;
-    h.anticodon = g.anticodon;
-    h.var = g.var;
-    h.tstem = g.tstem;
-    h.tloop = g.tloop;
-    h.score = g.energy;
-    return h;
-}
 
 std::vector<tRNA> predict_trnas(std::string &dna) {
 
@@ -485,7 +235,7 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
   tmaxdist = (MAXTRNALEN + sw.maxintronlen - MINTSTEM_DIST);
 
   // Try to make a tRNA gene for each predicted T-loop
-  for(auto & tloop : find_tstems(seq, sw))
+  for(auto & tloop : find_tstems(seq, sw.loffset, sw.roffset, sw.ttscanthresh, sw.ttarmthresh))
   {
     tpos = tloop.pos;
     t.tloop = tloop.loop;
@@ -509,7 +259,7 @@ std::vector<tRNA> predict_trnas(std::string &dna) {
     astem_max_start = astem_max_start < 0 ? 0 : astem_max_start;
 
     // Look for A-stems in compatible with the current T-loop
-    for(auto & astem5 : find_astem5(seq, astem_max_start, tpos-tmindist, tend, 7, sw))
+    for(auto & astem5 : find_astem5(seq, astem_max_start, tpos-tmindist, tend, 7, sw.tascanthresh, sw.tastemthresh))
     {
 
       apos = astem5.pos;
